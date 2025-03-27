@@ -8,31 +8,33 @@
             <button
                 class="add-button"
                 @mouseover="hover = true"
-                @mouseleave="hover = false">
+                @mouseleave="hover = false"
+                @click="toggleFavorite">
                 <img
                     :src="
-                        hover
+                        isFavorite || hover
                             ? require('@/assets/svgicons/heart.svg')
                             : require('@/assets/svgicons/love.svg')
                     "
                     alt="Heart Icon"
-                    class="addicon" />
+                    class="addicon"
+                    :class="{ 'animate-fav': favAnimating }" />
             </button>
         </div>
         <div class="bottle-info">
-            <p class="bottle-name">Buffalo Trace Bourbon Cream 750ml</p>
+            <p class="bottle-name">{{ product.ProductName }}</p>
             <div
                 class="d-flex flex-row justify-content-between align-items-center">
                 <div class="price-section">
-                    <span class="discounted-price">20'000₮</span>
-                    <!-- <span class="original-price">$24.95</span> -->
+                    <span class="discounted-price">{{ product.Price }}₮</span>
                 </div>
 
                 <img
                     :src="require('@/assets/svgicons/cart.svg')"
-                    alt="Bottle Image"
+                    alt="Cart Icon"
                     class="addicon"
-                    style="margin-right: 8px" />
+                    style="margin-right: 8px; cursor: pointer"
+                    @click="addToCart" />
             </div>
         </div>
     </div>
@@ -41,24 +43,62 @@
 <script>
 export default {
     name: 'BottleItem',
+    props: {
+        product: Object,
+    },
     data() {
         return {
             hover: false,
+            isFavorite: false,
+            favAnimating: false, // ⭐ used to trigger animation
         };
+    },
+    mounted() {
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        this.isFavorite = favorites.includes(this.product.ProductId);
+    },
+    methods: {
+        toggleFavorite() {
+            let favorites = JSON.parse(
+                localStorage.getItem('favorites') || '[]'
+            );
+
+            this.favAnimating = true;
+
+            if (this.isFavorite) {
+                favorites = favorites.filter(
+                    (id) => id !== this.product.ProductId
+                );
+                this.isFavorite = false;
+                this.$emit('remove-favorite', this.product);
+            } else {
+                favorites.push(this.product.ProductId);
+                this.isFavorite = true;
+                this.$emit('add-favorite', this.product);
+            }
+
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+
+            // reset animation state after it runs
+            setTimeout(() => {
+                this.favAnimating = false;
+            }, 300); // must match CSS animation duration
+        },
+
+        addToCart() {
+            this.$emit('add-cart', this.product);
+        },
     },
 };
 </script>
 
 <style scoped>
-/* Container */
 .bottle-item {
-    flex: 1 1 250px; /* flex-grow: 1, flex-shrink: 1, flex-basis: 250px */
+    flex: 1 1 250px;
     min-width: 250px;
-    /* max-width: 300px; */
     text-align: start;
 }
 
-/* Image Section */
 .image-container {
     position: relative;
     background: white;
@@ -71,22 +111,19 @@ export default {
 }
 
 .image-container:hover .bottle-image {
-    transform: scale(1.1); /* Increases size */
-    transition: transform 0.3s ease-in-out; /* Smooth transition */
+    transform: scale(1.1);
+    transition: transform 0.3s ease-in-out;
 }
 .bottle-image {
     width: 100px;
-    height: 80px;
     height: auto;
 }
 .addicon {
     width: 16px;
     height: 16px;
-
     transition: opacity 0.3s ease-in-out;
 }
 
-/* Add Button */
 .add-button {
     position: absolute;
     top: 10px;
@@ -102,7 +139,6 @@ export default {
     cursor: pointer;
 }
 
-/* Info Section */
 .bottle-info {
     margin-top: 10px;
 }
@@ -112,7 +148,6 @@ export default {
     color: #444;
 }
 
-/* Price Section */
 .price-section {
     display: flex;
     justify-content: start;
@@ -130,5 +165,21 @@ export default {
     font-size: 14px;
     color: gray;
     text-decoration: line-through;
+}
+
+.animate-fav {
+    animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.4);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 </style>

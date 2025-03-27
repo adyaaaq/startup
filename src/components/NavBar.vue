@@ -24,6 +24,13 @@
                 <router-link :to="{ name: 'Login' }" class="cart-link">
                     <span class="auth-link">Нэвтрэх</span>
                 </router-link>
+                <router-link :to="{ name: 'Favorites' }" class="cart-link">
+                    <img
+                        class="svgicon"
+                        style="height: 16px; width: 16px"
+                        src="@/assets/svgicons/love.svg"
+                        alt="Cart Icon" />
+                </router-link>
                 <router-link :to="{ name: 'Cart' }" class="cart-link">
                     <div class="cart">
                         <img

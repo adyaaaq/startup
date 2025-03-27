@@ -1,8 +1,7 @@
 <template>
     <div id="body-pd">
-        <NavBar></NavBar>
-        <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-        <div class="content-body">
+        <NavBar v-if="!isAdminRoute" />
+        <div v-if="!isAdminRoute" class="content-body">
             <div class="content-section">
                 <div class="content-container">
                     <transition name="moveInUp">
@@ -11,18 +10,31 @@
                 </div>
             </div>
         </div>
+        <div v-else>
+            <div class="content-container">
+                <transition name="moveInUp">
+                    <router-view />
+                </transition>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
 // import HelloWorld from './components/HelloWorld.vue';
 import NavBar from './components/NavBar.vue';
-
+// import AdminLayout from './screens/Layout/AdminLayout.vue';
 export default {
     name: 'App',
     components: {
         NavBar,
+        // AdminLayout,
         // HelloWorld,
+    },
+    computed: {
+        isAdminRoute() {
+            return this.$route.path.startsWith('/admin');
+        },
     },
 };
 </script>
@@ -927,6 +939,7 @@ input::-webkit-inner-spin-button {
 .modal-xl-right .modal-header {
     border-bottom: 0px;
     padding-bottom: 0px !important;
+    justify-content: space-between !important;
 }
 .modal-xl-right .modal-header .modal-title {
     font-size: var(--big-font-size) !important;

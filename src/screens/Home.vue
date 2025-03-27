@@ -23,6 +23,11 @@
         </div>
 
         <div class="products-container">
+            <bottleItem
+                v-for="(Product, index) in Products"
+                :key="index"
+                :product="Product" />
+            <!-- <bottleItem />
             <bottleItem />
             <bottleItem />
             <bottleItem />
@@ -30,9 +35,7 @@
             <bottleItem />
             <bottleItem />
             <bottleItem />
-            <bottleItem />
-            <bottleItem />
-            <bottleItem />
+            <bottleItem /> -->
         </div>
     </div>
 </template>
@@ -43,6 +46,26 @@ import specialItem from '@/components/specialItem.vue';
 export default {
     name: 'HomePage',
     components: { bottleItem, specialItem },
+    data() {
+        return {
+            Products: [
+                {
+                    BranchId: 1,
+                    CategoryId: 1,
+                    Price: 30000,
+                    ProductId: 1,
+                    ProductName: 'ууыбы Арйоыбр',
+                },
+                {
+                    BranchId: 1,
+                    CategoryId: 1,
+                    Price: 35000,
+                    ProductId: 2,
+                    ProductName: 'ууыбы Арйоыбр',
+                },
+            ],
+        };
+    },
     methods: {
         goToProducts() {
             this.$router.push({ name: 'Products' }); // Ensure 'Products' route is defined

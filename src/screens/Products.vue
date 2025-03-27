@@ -53,9 +53,11 @@
 
             <div class="products-container">
                 <bottleItem
-                    v-for="(product, index) in sortedProducts"
-                    :key="index"
-                    :product="product" />
+                    v-for="product in sortedProducts"
+                    :key="product.ProductId"
+                    :product="product"
+                    @add-favorite="handleFavorite"
+                    @add-cart="handleCart" />
             </div>
         </main>
     </div>
@@ -63,6 +65,7 @@
 
 <script>
 import bottleItem from '@/components/bottleItem.vue';
+import api from '@/services/api';
 export default {
     name: 'ProductsPage',
     components: { bottleItem },
@@ -117,27 +120,53 @@ export default {
             sortOption: 'name-asc', // Default sorting option
         };
     },
+    methods: {
+        handleFavorite(product) {
+            let favorites = JSON.parse(
+                localStorage.getItem('favorites') || '[]'
+            );
+
+            // prevent duplicates
+            if (!favorites.includes(product.ProductId)) {
+                favorites.push(product.ProductId);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+            }
+        },
+        handleCart(product) {
+            console.log('CART:', product);
+            // Add to cart logic here
+        },
+    },
+    async mounted() {
+        const res = await api.getProducts();
+        console.log('we got products', res);
+        this.products = res;
+    },
     computed: {
         minPrice() {
-            return Math.min(...this.products.map((p) => p.price));
+            return Math.min(...this.products.map((p) => p.Price));
         },
         maxPrice() {
-            return Math.max(...this.products.map((p) => p.price));
+            return Math.max(...this.products.map((p) => p.Price));
         },
         filteredProducts() {
             return this.products.filter(
                 (product) =>
-                    product.price >= this.priceMin &&
-                    product.price <= this.priceMax
+                    product.Price >= this.priceMin &&
+                    product.Price <= this.priceMax
             );
         },
         sortedProducts() {
             let sorted = [...this.filteredProducts];
 
             if (this.sortOption === 'name-asc') {
-                sorted.sort((a, b) => a.name.localeCompare(b.name));
+                sorted.sort((a, b) =>
+                    a.ProductName.localeCompare(b.ProductName)
+                );
             } else if (this.sortOption === 'name-desc') {
-                sorted.sort((a, b) => b.name.localeCompare(a.name));
+                sorted.sort((a, b) =>
+                    b.ProductName.localeCompare(a.ProductName)
+                );
             } else if (this.sortOption === 'price-asc') {
                 sorted.sort((a, b) => a.price - b.price);
             } else if (this.sortOption === 'price-desc') {
