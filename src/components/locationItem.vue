@@ -1,14 +1,23 @@
 <template>
-    <button class="locItem-container gap-2">
+    <button
+        class="locItem-container gap-2"
+        @click="selectItem"
+        :class="{ selected: selected === location.id }">
         <div class="d-flex flex-row gap-2">
             <input
                 type="radio"
-                id="option1"
-                value="option1"
-                v-model="selectedOption" />
+                :id="`location-${location.id}`"
+                :value="location.id"
+                :checked="selected === location.id"
+                @change="selectItem" />
             <div class="d-flex flex-column">
-                <label for="option1" class="locTitle">Option 1</label>
-                <p>бөйыбөь, өбйыөйыө ,й өбйы өйыөйы</p>
+                <label for="option1" class="locTitle">{{
+                    this.location.Title
+                }}</label>
+                <p style="text-align: start">
+                    {{ this.location.Hot }}, {{ this.location.Duureg }},
+                    {{ this.location.Horoo }}
+                </p>
             </div>
         </div>
         <div class="d-flex flex-row gap-2 align-items-center">
@@ -25,6 +34,52 @@
                     alt="Trash icon" />
             </button>
         </div>
+        <b-modal
+            v-model="editModalVisible"
+            title="Хүргэлтийн хаяг засах"
+            hide-footer
+            centered>
+            <div class="modal-body">
+                <p>Do you want to edit this location?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button
+                    class="modal-btn cancel"
+                    @click="editModalVisible = false">
+                    Cancel
+                </button>
+                <button class="modal-btn confirm" @click="confirmEdit">
+                    Confirm
+                </button>
+            </div>
+        </b-modal>
+        <b-modal
+            v-model="removeModalVisible"
+            title="Хүргэлтийн хаяг устгах"
+            hide-footer
+            centered>
+            <div class="modal-body">
+                <div class="d-flex flex-row align-items-center">
+                    <h6 class="mb-0">{{ this.location.Title }}</h6>
+                    <p>
+                        - {{ this.location.Hot }}, {{ this.location.Duureg }},
+                        {{ this.location.Horoo }}
+                    </p>
+                </div>
+                <p>{{ this.location.detail }}</p>
+                <p>Та хүргэлтийн хаягийг устгахдаа итгэлтэй байна уу?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button
+                    class="modal-btn cancel"
+                    @click="removeModalVisible = false">
+                    Cancel
+                </button>
+                <button class="modal-btn confirm" @click="confirmRemove">
+                    Remove
+                </button>
+            </div>
+        </b-modal>
     </button>
 
     <!-- Edit Confirmation Modal -->
@@ -33,6 +88,12 @@
 <script>
 export default {
     name: 'LocItem',
+    props: {
+        location: Object,
+        selected: Number,
+        edit: Function,
+    },
+
     data() {
         return {
             selectedOption: null,
@@ -40,21 +101,28 @@ export default {
             removeModalVisible: false,
         };
     },
+    mounted() {
+        console.log('loc here: ', this.location);
+    },
     methods: {
+        selectItem() {
+            if (this.selected !== this.location.id) {
+                this.$emit('select', this.location.id);
+            }
+        },
         showEditModal() {
-            this.$refs['choose-stud-modal'].show();
-            console.log('Editing item...');
-            this.editModalVisible = true;
+            this.$emit('edit', this.location); // ✅ Emit to parent
+            // this.editModalVisible = true;
         },
         showRemoveModal() {
             this.removeModalVisible = true;
         },
-        edit() {
-            this.$refs['choose-stud-modal'].show();
-            console.log('Editing item...');
+        confirmEdit() {
+            console.log('Location edited!');
+            this.editModalVisible = false;
         },
-        remove() {
-            console.log('Removing item...');
+        confirmRemove() {
+            console.log('Location removed!');
             this.removeModalVisible = false;
         },
     },
@@ -62,6 +130,10 @@ export default {
 </script>
 
 <style scoped>
+.locItem-container.selected {
+    border: 2px solid #6c63ff;
+    background-color: #f5f5ff;
+}
 .locItem-container {
     min-width: 300px;
     display: flex;
@@ -80,6 +152,7 @@ export default {
     font-weight: 600;
     font-size: 14px;
     text-overflow: ellipsis;
+    text-align: start;
 }
 
 .lil-icon {

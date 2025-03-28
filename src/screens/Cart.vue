@@ -48,17 +48,19 @@
                             <td class="product-info">
                                 <div class="product-image-container">
                                     <img
-                                        :src="item.image"
+                                        :src="
+                                            require('@/assets/images/wine.png')
+                                        "
                                         class="product-image"
                                         alt="Product Image" />
                                 </div>
                                 <div
                                     class="d-flex flex-column gap-2 justify-content-between">
                                     <p class="product-name mb-0">
-                                        {{ item.name }}
+                                        {{ item.ProductName }}
                                     </p>
                                     <p class="product-id mb-0">
-                                        {{ item.price }}₮
+                                        {{ item.Price }}₮
                                     </p>
                                 </div>
                             </td>
@@ -75,7 +77,7 @@
                                 </button>
                             </td>
                             <td class="product-price">
-                                ${{ item.price.toFixed(2) }}
+                                {{ item.Price.toFixed(2) }} ₮
                             </td>
                             <td>
                                 <button
@@ -111,34 +113,53 @@
                         <button class="btn-secondar mt-4 col" @click="toggle">
                             цуцлах
                         </button>
-                        <button class="btn-primary mt-4 col" @click="toggle">
-                            хадгалах
+                        <button
+                            class="btn-primary mt-4 col"
+                            @click="saveLocation">
+                            {{ locBtnText }}
                         </button>
                     </div>
-                    <div
-                        v-if="locAddFormShow"
-                        class="row-2 d-flex flex-row gap-3 mt-3 align-items-end">
-                        <div class="d-flex flex-column gap-1">
-                            <p>Хаягийн нэр</p>
-                            <input type="text" class="form-control" />
+                    <div v-if="locAddFormShow" class="d-flex flex-column gap-2">
+                        <div
+                            class="row-2 d-flex flex-row gap-3 mt-3 align-items-end">
+                            <div class="d-flex flex-column gap-1 w-100">
+                                <p>Хаягийн нэр</p>
+                                <input
+                                    type="text"
+                                    v-model="editedLocation.name"
+                                    class="form-control" />
+                                <small>{{ error.title }}</small>
+                            </div>
+                            <div class="d-flex flex-column gap-1 w-100">
+                                <p>Дүүрэг</p>
+                                <input
+                                    type="text"
+                                    v-model="editedLocation.district"
+                                    class="form-control" />
+                            </div>
+                            <div class="d-flex flex-column gap-1 w-100">
+                                <p>Хороо</p>
+                                <input
+                                    type="text"
+                                    v-model="editedLocation.subdistrict"
+                                    class="form-control" />
+                            </div>
                         </div>
-                        <div class="d-flex flex-column gap-1">
-                            <p>Хот</p>
-                            <input type="text" class="form-control" />
+                        <div class="d-flex flex-row gap-1 align-items-center">
+                            <input
+                                type="checkbox"
+                                v-model="editedLocation.isAnotherPersonRecieve"
+                                class="form-check-input" />
+                            <p>Өөр хүн хүлээж авна</p>
                         </div>
-                        <div class="d-flex flex-column gap-1">
-                            <p>Дүүрэг</p>
-                            <input type="text" class="form-control" />
-                        </div>
-                        <div class="d-flex flex-column gap-1">
-                            <p>Хороо</p>
-                            <input type="text" class="form-control" />
-                        </div>
-                        <div class="add-icon-container">
-                            <img
-                                :src="require('@/assets/svgicons/add.svg')"
-                                class="add-icon"
-                                alt="add icon" />
+                        <div>
+                            <div class="d-flex flex-column gap-1">
+                                <p>Дэлгэрэнгүй мэдээлэл</p>
+                                <input
+                                    type="text"
+                                    v-model="editedLocation.subdistrict"
+                                    class="form-control" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -170,65 +191,68 @@
 
 <script>
 import locationItem from '@/components/locationItem.vue';
+import { EventBus } from '@/Utils/eventBus';
+import api from '@/services/api';
+
 export default {
     name: 'CartPage',
     components: { locationItem },
     data() {
         return {
             cartItems: [
-                {
-                    id: '4553458120',
-                    name: 'Top for Women',
-                    size: 'L',
-                    quantity: 2,
-                    price: 50.0,
-                    image: require('@/assets/images/wine.png'),
-                },
-                {
-                    id: '8953458747',
-                    name: 'Blue T-shirt for Men',
-                    size: 'M',
-                    quantity: 2,
-                    price: 50.0,
-                    image: require('@/assets/images/wine.png'),
-                },
-                {
-                    id: '2011458796',
-                    name: 'Pink Shirt for Men',
-                    size: 'XL',
-                    quantity: 2,
-                    price: 50.0,
-                    image: require('@/assets/images/wine.png'),
-                },
+                // {
+                //     id: '4553458120',
+                //     name: 'Top for Women',
+                //     size: 'L',
+                //     quantity: 2,
+                //     price: 50.0,
+                //     image: require('@/assets/images/wine.png'),
+                // },
+                // {
+                //     id: '8953458747',
+                //     name: 'Blue T-shirt for Men',
+                //     size: 'M',
+                //     quantity: 2,
+                //     price: 50.0,
+                //     image: require('@/assets/images/wine.png'),
+                // },
+                // {
+                //     id: '2011458796',
+                //     name: 'Pink Shirt for Men',
+                //     size: 'XL',
+                //     quantity: 2,
+                //     price: 50.0,
+                //     image: require('@/assets/images/wine.png'),
+                // },
             ],
-            LocationItems: [
-                {
-                    id: 1,
-                    title: 'test1',
-                    niislel: 'niislel',
-                    duureg: 'duureg',
-                    horoo: 'horoo',
-                },
-                {
-                    id: 2,
-                    title: 'test1',
-                    niislel: 'niislel',
-                    duureg: 'duureg',
-                    horoo: 'horoo',
-                },
-                {
-                    id: 3,
-                    title: 'test1',
-                    niislel: 'niislel',
-                    duureg: 'duureg',
-                    horoo: 'horoo',
-                },
-            ],
+            LocationItems: [],
             deliveryFee: 20.0,
-
+            selectedId: null,
             selectedOption: 'option1',
             locAddFormShow: false,
+            editedLocation: {
+                id: null,
+                name: '',
+                city: '',
+                district: '',
+                subdistrict: '',
+                isAnotherPersonRecieve: false,
+            },
+            locBtnText: 'Нэмэх',
+            op: 1,
+            error: {
+                title: '',
+                city: '',
+                district: '',
+                subdistrict: '',
+            },
         };
+    },
+    async mounted() {
+        this.loadCartItems();
+        const res = await api.getLocationsByUser(1);
+        console.log('we got locations', res);
+        this.LocationItems = res;
     },
     computed: {
         subtotal() {
@@ -242,32 +266,98 @@ export default {
         },
     },
     methods: {
+        loadCartItems() {
+            const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+            this.cartItems = storedCart.map((item) => ({
+                ...item,
+                quantity: item.quantity || 1, // Default to 1 if no quantity found
+            }));
+        },
         increaseQuantity(index) {
             this.cartItems[index].quantity++;
+            this.updateLocalStorage();
         },
+
+        // Decrease quantity
         decreaseQuantity(index) {
             if (this.cartItems[index].quantity > 1) {
                 this.cartItems[index].quantity--;
+            } else {
+                this.removeItem(index); // If quantity is 1, remove item
             }
+            this.updateLocalStorage();
         },
         removeItem(index) {
             this.cartItems.splice(index, 1);
+            this.updateLocalStorage();
+        },
+
+        updateLocalStorage() {
+            localStorage.setItem('cart', JSON.stringify(this.cartItems));
+
+            // Emit updated cart to Navbar
+            EventBus.$emit('cart-updated', this.cartItems);
         },
         toggle() {
             console.log('locAddFormShow', this.locAddFormShow);
             this.locAddFormShow = !this.locAddFormShow;
+            this.locBtnText = 'Нэмэх';
+
+            this.editedLocation.id = null;
+            this.editedLocation.name = '';
+            this.editedLocation.city = '';
+            this.editedLocation.district = '';
+            this.editedLocation.subdistrict = '';
+            this.op = 1;
         },
-        selectLocation(location) {
-            this.selectedId = location.id;
-            this.selectedLocation = location;
+        editLocation() {
+            console.log('editintg');
         },
-        openEditModal(location) {
-            this.selectedLocation = location;
-            this.editModalVisible = true;
+        selectLocation(id) {
+            this.selectedId = id;
+            console.log('Selected location ID:', id);
         },
-        openRemoveModal(location) {
-            this.selectedLocation = location;
-            this.removeModalVisible = true;
+        openEditModal(item) {
+            console.log('Editing location:', item);
+            this.editedLocation.id = item.LocationId;
+            this.editedLocation.name = item.Title;
+            this.editedLocation.city = item.Hot;
+            this.editedLocation.district = item.Duureg;
+            this.editedLocation.subdistrict = item.Horoo;
+
+            this.locAddFormShow = true;
+            this.op = 2;
+            this.locBtnText = 'Хадгалах';
+        },
+        openRemoveModal(item) {
+            console.log('Removing location:', item);
+        },
+        saveLocation() {
+            if (this.validate()) {
+                if (this.op == 1) {
+                    console.log('creating loc');
+                }
+                if (this.op == 2) {
+                    console.log('updating');
+                }
+            }
+        },
+        validate() {
+            const name = this.editedLocation.name.trim();
+            // const city = this.editedLocation.city.trim();
+            const district = this.editedLocation.district.trim();
+            const subdistrict = this.editedLocation.subdistrict.trim();
+
+            // Check if any field is empty or contains only spaces
+            if (!name || !district || !subdistrict) {
+                alert(
+                    'All fields are required and cannot contain only spaces!'
+                );
+                return false;
+            }
+
+            // All fields are valid
+            return true;
         },
     },
 };

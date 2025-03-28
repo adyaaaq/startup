@@ -1,19 +1,15 @@
 <template>
     <nav class="navbar">
         <div class="nav-container">
+            <!-- Logo / Home -->
             <router-link :to="{ name: 'Home' }" class="cart-link">
                 <div class="logo">
-                    <span class="black-text">Mimi Liqour</span
-                    ><span class="orange-text">Shop</span>
+                    <span class="black-text">Mimi Liqour</span>
+                    <span class="orange-text">Shop</span>
                 </div>
             </router-link>
-            <!-- <div class="left-section">
-                <button class="menu-btn">☰</button>
-            </div> -->
-            <!-- <div class="logo">
-                <span class="black-text">Mimi Liqour</span
-                ><span class="orange-text">Shop</span>
-            </div> -->
+
+            <!-- Right Section -->
             <div class="right-section">
                 <router-link :to="{ name: 'Products' }" class="cart-link">
                     <span class="auth-link">Шингэн зүйлс </span>
@@ -24,21 +20,31 @@
                 <router-link :to="{ name: 'Login' }" class="cart-link">
                     <span class="auth-link">Нэвтрэх</span>
                 </router-link>
+
+                <!-- Favorites -->
                 <router-link :to="{ name: 'Favorites' }" class="cart-link">
                     <img
                         class="svgicon"
                         style="height: 16px; width: 16px"
                         src="@/assets/svgicons/love.svg"
-                        alt="Cart Icon" />
+                        alt="Favorites Icon" />
                 </router-link>
+
+                <!-- Cart -->
                 <router-link :to="{ name: 'Cart' }" class="cart-link">
                     <div class="cart">
                         <img
                             class="svgicon"
                             src="@/assets/svgicons/cart.svg"
                             alt="Cart Icon" />
-                        <span class="cart-total">40,235</span>
-                        <span class="cart-notification"></span>
+                        <span
+                            v-if="distinctItemCount > 0"
+                            class="cart-notification">
+                            {{ distinctItemCount }}
+                        </span>
+                        <span class="cart-total"
+                            >{{ totalPrice.toLocaleString() }}₮</span
+                        >
                     </div>
                 </router-link>
             </div>
@@ -47,8 +53,42 @@
 </template>
 
 <script>
+import { EventBus } from '@/Utils/eventBus';
+
 export default {
     name: 'AppNavbar',
+    data() {
+        return {
+            cartItems: [],
+        };
+    },
+    computed: {
+        // Calculate distinct item count
+        distinctItemCount() {
+            return this.cartItems.length; // Number of unique products in the cart
+        },
+        // Calculate the total price of cart items
+        totalPrice() {
+            return this.cartItems.reduce(
+                (sum, item) => sum + item.Price * item.quantity,
+                0
+            );
+        },
+    },
+    mounted() {
+        this.loadCartItems(); // Load initial cart items
+
+        // Listen for cart updates
+        EventBus.$on('cart-updated', (cartItems) => {
+            this.cartItems = cartItems; // Update cartItems
+        });
+    },
+    methods: {
+        loadCartItems() {
+            const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+            this.cartItems = storedCart;
+        },
+    },
 };
 </script>
 
@@ -152,5 +192,38 @@ export default {
     position: absolute;
     top: -2px;
     right: -2px;
+}
+
+/* Cart Container */
+.cart {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Cart Total Price */
+.cart-total {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Cart Notification (item count) */
+.cart-notification {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
 </style>

@@ -28,19 +28,20 @@
                 <div class="price-section">
                     <span class="discounted-price">{{ product.Price }}₮</span>
                 </div>
-
                 <img
                     :src="require('@/assets/svgicons/cart.svg')"
                     alt="Cart Icon"
                     class="addicon"
                     style="margin-right: 8px; cursor: pointer"
-                    @click="addToCart" />
+                    @click="addToCart"
+                    :class="{ 'animate-cart': cartAnimating }" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import { EventBus } from '@/Utils/eventBus';
 export default {
     name: 'BottleItem',
     props: {
@@ -51,6 +52,7 @@ export default {
             hover: false,
             isFavorite: false,
             favAnimating: false, // ⭐ used to trigger animation
+            cartAnimating: false, // ⭐ New animation for cart
         };
     },
     mounted() {
@@ -86,7 +88,32 @@ export default {
         },
 
         addToCart() {
-            this.$emit('add-cart', this.product);
+            let cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+
+            // Check if item already exists in cart
+            const existingItem = cartItems.find(
+                (item) => item.ProductId === this.product.ProductId
+            );
+
+            if (existingItem) {
+                // If item exists, increase quantity
+                existingItem.quantity += 1;
+            } else {
+                // Add new item with quantity 1
+                cartItems.push({ ...this.product, quantity: 1 });
+            }
+
+            // Save updated cart to localStorage
+            localStorage.setItem('cart', JSON.stringify(cartItems));
+
+            // Emit event to update cart in Navbar
+            EventBus.$emit('cart-updated', cartItems);
+
+            this.cartAnimating = true;
+
+            setTimeout(() => {
+                this.cartAnimating = false;
+            }, 300);
         },
     },
 };
@@ -168,6 +195,22 @@ export default {
 }
 
 .animate-fav {
+    animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.4);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+/* Cart animation */
+.animate-cart {
     animation: pop 0.3s ease;
 }
 

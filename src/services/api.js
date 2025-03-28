@@ -47,6 +47,17 @@ export const createOrder = (data) =>
 export const deleteOrder = (id) =>
     api.delete(`/orders/${id}`).then((res) => res.data);
 
+// ----------------------
+// Location
+// ----------------------
+export const getLocations = () => api.get('/locations').then((res) => res.data);
+export const getLocationsByUser = (userId) =>
+    api.get(`/locations/user/${userId}`).then((res) => res.data);
+export const createLocation = (data) =>
+    api.post('/locations', data).then((res) => res.data);
+export const deleteLocation = (id) =>
+    api.delete(`/locations/${id}`).then((res) => res.data);
+
 export default {
     getProducts,
     getProduct,
@@ -65,4 +76,9 @@ export default {
     getOrdersByUser,
     createOrder,
     deleteOrder,
+
+    getLocations,
+    getLocationsByUser,
+    createLocation,
+    deleteLocation,
 };

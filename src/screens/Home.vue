@@ -7,6 +7,12 @@
                 <div class="small-box blue-box"></div>
             </div>
         </div>
+        <div class="d-flex flex-row justify-content-between m-4">
+            <span class="medium-title">Багцууд</span>
+            <button class="show-all-btn" @click="goToProducts">
+                <span class="btn-text"> Бүгдийн үзэх </span>
+            </button>
+        </div>
         <div class="d-flex align-items-center justify-content-center w-100">
             <div
                 class="d-flex justify-content-between flex-wrap gap-3 m-4 w-100">
