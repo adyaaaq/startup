@@ -9,51 +9,45 @@
                 </div>
             </router-link>
 
-            <!-- Hamburger (Mobile Only) -->
-            <!-- Hamburger button -->
-            <button class="hamburger" @click="toggleMobileMenu">☰</button>
+            <!-- Right Section -->
+            <div class="right-section">
+                <router-link :to="{ name: 'Products' }" class="cart-link">
+                    <span class="auth-link">Шингэн зүйлс </span>
+                </router-link>
+                <router-link :to="{ name: 'Flowers' }" class="cart-link">
+                    <span class="auth-link">Цэцэг </span>
+                </router-link>
+                <router-link :to="{ name: 'Login' }" class="cart-link">
+                    <span class="auth-link">Нэвтрэх</span>
+                </router-link>
 
-            <!-- Animated Mobile Menu (visible on small screens only) -->
-            <transition name="slide">
-                <div v-if="mobileMenuVisible" class="mobile-nav-menu">
-                    <router-link
-                        @click.native="closeMobileMenu"
-                        to="/products"
-                        class="nav-item"
-                        >Шингэн зүйлс</router-link
-                    >
-                    <router-link
-                        @click.native="closeMobileMenu"
-                        to="/flowers"
-                        class="nav-item"
-                        >Цэцэг</router-link
-                    >
-                    <router-link
-                        @click.native="closeMobileMenu"
-                        to="/login"
-                        class="nav-item"
-                        >Нэвтрэх</router-link
-                    >
-                    <router-link
-                        @click.native="closeMobileMenu"
-                        to="/favorites"
-                        class="nav-item"
-                        >💖 Favorites</router-link
-                    >
-                    <router-link
-                        @click.native="closeMobileMenu"
-                        to="/cart"
-                        class="nav-item"
-                        >🛒 Cart</router-link
-                    >
-                </div>
-            </transition>
+                <!-- Favorites -->
+                <router-link :to="{ name: 'Favorites' }" class="cart-link">
+                    <img
+                        class="svgicon"
+                        style="height: 16px; width: 16px"
+                        src="@/assets/svgicons/love.svg"
+                        alt="Favorites Icon" />
+                </router-link>
 
-            <!-- Optional Backdrop -->
-            <div
-                v-if="mobileMenuVisible"
-                class="backdrop"
-                @click="closeMobileMenu"></div>
+                <!-- Cart -->
+                <router-link :to="{ name: 'Cart' }" class="cart-link">
+                    <div class="cart">
+                        <img
+                            class="svgicon"
+                            src="@/assets/svgicons/cart.svg"
+                            alt="Cart Icon" />
+                        <span
+                            v-if="distinctItemCount > 0"
+                            class="cart-notification">
+                            {{ distinctItemCount }}
+                        </span>
+                        <span class="cart-total"
+                            >{{ totalPrice.toLocaleString() }}₮</span
+                        >
+                    </div>
+                </router-link>
+            </div>
         </div>
     </nav>
 </template>
@@ -66,10 +60,8 @@ export default {
     data() {
         return {
             cartItems: [],
-            mobileMenuVisible: false,
         };
     },
-
     computed: {
         // Calculate distinct item count
         distinctItemCount() {
@@ -92,12 +84,6 @@ export default {
         });
     },
     methods: {
-        toggleMobileMenu() {
-            this.mobileMenuVisible = !this.mobileMenuVisible;
-        },
-        closeMobileMenu() {
-            this.mobileMenuVisible = false;
-        },
         loadCartItems() {
             const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
             this.cartItems = storedCart;
@@ -120,6 +106,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    padding: 0px 40px;
     max-width: 1600px;
 }
 
@@ -238,81 +225,5 @@ export default {
     align-items: center;
     font-weight: bold;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-}
-
-.hamburger {
-    display: none;
-    font-size: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #333;
-}
-
-/* Slide-in animation */
-.slide-enter-active,
-.slide-leave-active {
-    transition: transform 0.3s ease;
-}
-.slide-enter,
-.slide-leave-to {
-    transform: translateX(100%);
-}
-
-/* Mobile nav menu */
-.mobile-nav-menu {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 250px;
-    height: 100vh;
-    background: white;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    gap: 16px;
-}
-
-/* Backdrop behind the menu */
-.backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 9998;
-}
-
-/* Hamburger button */
-.hamburger {
-    display: none;
-    font-size: 26px;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .hamburger {
-        display: block;
-    }
-
-    .right-section {
-        display: none !important; /* Hide the normal nav */
-    }
-}
-
-/* Optional styling for links inside mobile nav */
-.nav-item {
-    text-decoration: none;
-    color: #333;
-    font-weight: 600;
-    font-size: 16px;
-}
-.nav-item:hover {
-    color: orange;
 }
 </style>

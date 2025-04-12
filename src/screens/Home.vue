@@ -48,6 +48,7 @@
 <script>
 import bottleItem from '@/components/bottleItem.vue';
 import specialItem from '@/components/specialItem.vue';
+import api from '@/services/api';
 export default {
     name: 'HomePage',
     components: { bottleItem, specialItem },
@@ -71,7 +72,10 @@ export default {
             ],
         };
     },
-    mounted: {},
+    async mounted() {
+        const res = await api.getProducts();
+        this.Products = res;
+    },
     methods: {
         goToProducts() {
             this.$router.push({ name: 'Products' }); // Ensure 'Products' route is defined
