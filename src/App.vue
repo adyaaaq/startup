@@ -975,4 +975,11 @@ input::-webkit-inner-spin-button {
     width: 24px;
     height: 24px;
 }
+
+.custom-placeholder::placeholder {
+    font-family: var(--text-font);
+    color: red;
+    font-size: 14px;
+    opacity: 1;
+}
 </style>

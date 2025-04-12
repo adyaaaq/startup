@@ -102,7 +102,8 @@
                             :selected="selectedId"
                             @select="selectLocation"
                             @edit="openEditModal"
-                            @remove="openRemoveModal" />
+                            @remove="showModal(1, item)"
+                            @loadLocations="loadLocations" />
                     </div>
                     <div class="d-flex flex-row w-100" v-if="!locAddFormShow">
                         <button class="btn-secondar mt-4 w-100" @click="toggle">
@@ -111,7 +112,7 @@
                     </div>
                     <div class="d-flex flex-row w-100 gap-4" v-else>
                         <button class="btn-secondar mt-4 col" @click="toggle">
-                            цуцлах
+                            Цуцлах
                         </button>
                         <button
                             class="btn-primary mt-4 col"
@@ -123,42 +124,141 @@
                         <div
                             class="row-2 d-flex flex-row gap-3 mt-3 align-items-end">
                             <div class="d-flex flex-column gap-1 w-100">
-                                <p>Хаягийн нэр</p>
+                                <div class="d-flex flex-row">
+                                    <span class="text-danger">* </span>&nbsp;
+                                    <p>Хаягийн нэр</p>
+                                </div>
                                 <input
                                     type="text"
                                     v-model="editedLocation.name"
-                                    class="form-control" />
-                                <small>{{ error.title }}</small>
+                                    placeholder="Гэр, Ажил"
+                                    class="form-control custom-placeholder"
+                                    :class="{
+                                        'border-danger': error.title,
+                                    }"
+                                    maxlength="100"
+                                    @input="error.title = false" />
                             </div>
                             <div class="d-flex flex-column gap-1 w-100">
-                                <p>Дүүрэг</p>
+                                <div class="d-flex flex-row">
+                                    <span class="text-danger">* </span>&nbsp;
+                                    <p>Дүүрэг</p>
+                                </div>
                                 <input
                                     type="text"
                                     v-model="editedLocation.district"
-                                    class="form-control" />
+                                    placeholder="Дүүрэг"
+                                    class="form-control custom-placeholder"
+                                    :class="{
+                                        'border-danger': error.district,
+                                    }"
+                                    @input="error.district = false"
+                                    maxlength="50" />
                             </div>
                             <div class="d-flex flex-column gap-1 w-100">
-                                <p>Хороо</p>
+                                <div class="d-flex flex-row">
+                                    <span class="text-danger">* </span>&nbsp;
+                                    <p>Хороо</p>
+                                </div>
                                 <input
                                     type="text"
                                     v-model="editedLocation.subdistrict"
-                                    class="form-control" />
+                                    placeholder="Хороо"
+                                    class="form-control custom-placeholder"
+                                    :class="{
+                                        'border-danger': error.subdistrict,
+                                    }"
+                                    @input="error.subdistrict = false"
+                                    maxlength="50" />
                             </div>
                         </div>
                         <div class="d-flex flex-row gap-1 align-items-center">
                             <input
                                 type="checkbox"
                                 v-model="editedLocation.isAnotherPersonRecieve"
-                                class="form-check-input" />
+                                class="form-check-input"
+                                @change="handleCheckboxToggle" />
                             <p>Өөр хүн хүлээж авна</p>
+                        </div>
+                        <div
+                            v-if="editedLocation.isAnotherPersonRecieve"
+                            class="row-2 d-flex flex-row gap-3 mt-1 align-items-end">
+                            <div class="d-flex flex-column gap-1 w-100">
+                                <div class="d-flex flex-row">
+                                    <span class="text-danger">* </span>&nbsp;
+                                    <p>Нэр</p>
+                                </div>
+                                <input
+                                    type="text"
+                                    v-model="
+                                        editedLocation.anotherPerson.f_name
+                                    "
+                                    placeholder="Нэр оруулна уу"
+                                    class="form-control custom-placeholder"
+                                    :class="{
+                                        'border-danger': error.f_name,
+                                    }"
+                                    @input="error.f_name = false"
+                                    maxlength="60" />
+                            </div>
+                            <div class="d-flex flex-column gap-1 w-100">
+                                <div class="d-flex flex-row">
+                                    <span class="text-danger">* </span>&nbsp;
+
+                                    <p>Овог</p>
+                                </div>
+                                <input
+                                    type="text"
+                                    v-model="
+                                        editedLocation.anotherPerson.l_name
+                                    "
+                                    placeholder="Овог оруулна уу"
+                                    class="form-control custom-placeholder"
+                                    :class="{
+                                        'border-danger': error.l_name,
+                                    }"
+                                    @input="error.l_name = false"
+                                    maxlength="60" />
+                            </div>
+                            <div class="d-flex flex-column gap-1 w-100">
+                                <div class="d-flex flex-row">
+                                    <span class="text-danger">* </span>&nbsp;
+                                    <p>Утасны дугаар</p>
+                                </div>
+                                <input
+                                    type="number"
+                                    v-model="
+                                        editedLocation.anotherPerson
+                                            .phone_number
+                                    "
+                                    placeholder="Утасны дугаар оруулна уу"
+                                    class="form-control custom-placeholder"
+                                    :class="{
+                                        'border-danger': error.phone_number,
+                                    }"
+                                    @input="limitPhoneNumber($event)" />
+                            </div>
                         </div>
                         <div>
                             <div class="d-flex flex-column gap-1">
-                                <p>Дэлгэрэнгүй мэдээлэл</p>
-                                <input
-                                    type="text"
-                                    v-model="editedLocation.subdistrict"
-                                    class="form-control" />
+                                <div class="d-flex flex-row">
+                                    <span class="text-danger">* </span>&nbsp;
+                                    <p>Дэлгэрэнгүй мэдээлэл</p>
+                                </div>
+                                <textarea
+                                    v-model="editedLocation.detail"
+                                    placeholder="Та хаягаа зөв дэлгэрэнгүй, тодорхой оруулаагүйгээс үүдэн хүргэлт удаашрах, эсвэл хүргэгдэхгүй байж болзошгүйг анхаарна уу."
+                                    class="form-control custom-placeholder"
+                                    style="
+                                        height: 74px;
+                                        overflow-y: auto;
+                                        resize: none;
+                                    "
+                                    maxlength="250"
+                                    :class="{
+                                        'border-danger': error.detail,
+                                    }"
+                                    @input="error.detail = false"></textarea>
                             </div>
                         </div>
                     </div>
@@ -186,6 +286,33 @@
             <!-- <button class="back-btn">Back to Shop</button> -->
             <button class="checkout-btn">Үргэлжүүлэх</button>
         </div>
+
+        <b-modal
+            v-model="removeModalVisible"
+            title="Хүргэлтийн хаяг устгах"
+            hide-footer
+            centered>
+            <div class="modal-body">
+                <div class="d-flex flex-row align-items-center">
+                    <h6 class="mb-0">test</h6>
+                    <p>- test,text-shadow, tesadf</p>
+                </div>
+                <p>dtail</p>
+                <p>Та хүргэлтийн хаягийг устгахдаа итгэлтэй байна уу?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button
+                    class="modal-btn cancel"
+                    @click="removeModalVisible = false">
+                    Cancel
+                </button>
+                <button
+                    class="modal-btn confirm"
+                    @click="deleteLocationConfirm">
+                    Remove
+                </button>
+            </div>
+        </b-modal>
     </div>
 </template>
 
@@ -199,35 +326,11 @@ export default {
     components: { locationItem },
     data() {
         return {
-            cartItems: [
-                // {
-                //     id: '4553458120',
-                //     name: 'Top for Women',
-                //     size: 'L',
-                //     quantity: 2,
-                //     price: 50.0,
-                //     image: require('@/assets/images/wine.png'),
-                // },
-                // {
-                //     id: '8953458747',
-                //     name: 'Blue T-shirt for Men',
-                //     size: 'M',
-                //     quantity: 2,
-                //     price: 50.0,
-                //     image: require('@/assets/images/wine.png'),
-                // },
-                // {
-                //     id: '2011458796',
-                //     name: 'Pink Shirt for Men',
-                //     size: 'XL',
-                //     quantity: 2,
-                //     price: 50.0,
-                //     image: require('@/assets/images/wine.png'),
-                // },
-            ],
+            cartItems: [],
             LocationItems: [],
             deliveryFee: 20.0,
             selectedId: null,
+            selectedLocation: null,
             selectedOption: 'option1',
             locAddFormShow: false,
             editedLocation: {
@@ -236,23 +339,32 @@ export default {
                 city: '',
                 district: '',
                 subdistrict: '',
+                detail: '',
                 isAnotherPersonRecieve: false,
+                anotherPerson: {
+                    f_name: '',
+                    l_name: '',
+                    phone_number: null,
+                },
             },
+
             locBtnText: 'Нэмэх',
             op: 1,
             error: {
-                title: '',
-                city: '',
-                district: '',
-                subdistrict: '',
+                title: false,
+                district: false,
+                subdistrict: false,
+                detail: false,
+                f_name: false,
+                l_name: false,
+                phone_number: false,
             },
+            removeModalVisible: false,
         };
     },
     async mounted() {
         this.loadCartItems();
-        const res = await api.getLocationsByUser(1);
-        console.log('we got locations', res);
-        this.LocationItems = res;
+        this.loadLocations();
     },
     computed: {
         subtotal() {
@@ -266,13 +378,42 @@ export default {
         },
     },
     methods: {
-        loadCartItems() {
-            const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-            this.cartItems = storedCart.map((item) => ({
-                ...item,
-                quantity: item.quantity || 1, // Default to 1 if no quantity found
-            }));
+        showModal(op, item) {
+            if (op == 1) {
+                console.log('removing location', item);
+                this.removeModalVisible = true;
+            }
         },
+        handleCheckboxToggle() {
+            if (this.editedLocation.isAnotherPersonRecieve) {
+                this.error.f_name = false;
+                this.error.l_name = false;
+                this.error.phone_number = false;
+            }
+            if (this.op == 1) {
+                this.editedLocation.anotherPerson.f_name = '';
+                this.editedLocation.anotherPerson.l_name = '';
+                this.editedLocation.anotherPerson.phone_number = '';
+            }
+            if (this.op == 2 && this.editedLocation.isAnotherPersonRecieve) {
+                this.editedLocation.anotherPerson.f_name =
+                    this.selectedLocation.f_name;
+                this.editedLocation.anotherPerson.l_name =
+                    this.selectedLocation.l_name;
+                this.editedLocation.anotherPerson.phone_number =
+                    this.selectedLocation.phone_number;
+            }
+        },
+        limitPhoneNumber(event) {
+            this.error.phone_number = false;
+            let value = event.target.value;
+            if (value.length > 8) {
+                value = value.slice(0, 8);
+                event.target.value = value;
+                this.editedLocation.anotherPerson.phone_number = value;
+            }
+        },
+
         increaseQuantity(index) {
             this.cartItems[index].quantity++;
             this.updateLocalStorage();
@@ -308,56 +449,173 @@ export default {
             this.editedLocation.city = '';
             this.editedLocation.district = '';
             this.editedLocation.subdistrict = '';
+            this.editedLocation.detail = '';
+
+            this.error.title = false;
+            this.error.district = false;
+            this.error.subdistrict = false;
+            this.error.detail = false;
+            this.editedLocation.isAnotherPersonRecieve = false;
             this.op = 1;
-        },
-        editLocation() {
-            console.log('editintg');
         },
         selectLocation(id) {
             this.selectedId = id;
+            this.selectedLocation = this.LocationItems.find(
+                (i) => i.LocationId === id
+            );
             console.log('Selected location ID:', id);
         },
         openEditModal(item) {
-            console.log('Editing location:', item);
+            this.error.title = false;
+            this.error.district = false;
+            this.error.subdistrict = false;
+            this.error.f_name = false;
+            this.error.l_name = false;
+            this.error.phone_number = false;
+            this.error.detail = false;
+
             this.editedLocation.id = item.LocationId;
             this.editedLocation.name = item.Title;
             this.editedLocation.city = item.Hot;
             this.editedLocation.district = item.Duureg;
             this.editedLocation.subdistrict = item.Horoo;
 
+            this.editedLocation.detail = item.Detail;
+            this.editedLocation.isAnotherPersonRecieve = item.isAnotherPerson;
+            if (this.editedLocation.isAnotherPersonRecieve) {
+                this.editedLocation.anotherPerson.f_name = item.f_name;
+                this.editedLocation.anotherPerson.l_name = item.l_name;
+                this.editedLocation.anotherPerson.phone_number =
+                    item.phone_number;
+            }
             this.locAddFormShow = true;
             this.op = 2;
             this.locBtnText = 'Хадгалах';
         },
-        openRemoveModal(item) {
-            console.log('Removing location:', item);
-        },
-        saveLocation() {
+        async saveLocation() {
             if (this.validate()) {
                 if (this.op == 1) {
-                    console.log('creating loc');
+                    console.log('creating loc', this.editedLocation);
+
+                    let data = {
+                        UserId: 1,
+                        Title: this.editedLocation.name,
+                        Hot: this.editedLocation.district,
+                        Duureg: this.editedLocation.district,
+                        Horoo: this.editedLocation.subdistrict,
+                        Detail: this.editedLocation.detail,
+                        isAnotherPerson:
+                            this.editedLocation.isAnotherPersonRecieve,
+                        f_name: this.editedLocation.anotherPerson.f_name,
+                        l_name: this.editedLocation.anotherPerson.l_name,
+                        phone_number:
+                            this.editedLocation.anotherPerson.phone_number,
+                    };
+
+                    try {
+                        const res = await api.createLocation(data);
+                        console.log('📦 Location created:', res);
+                        // You can call this.loadLocations() or show a success toast here
+                    } catch (err) {
+                        console.error('❌ Failed to create location:', err);
+                    }
                 }
+
                 if (this.op == 2) {
-                    console.log('updating');
+                    let data = {
+                        UserId: 1,
+                        Title: this.editedLocation.name,
+                        Hot: this.editedLocation.district,
+                        Duureg: this.editedLocation.district,
+                        Horoo: this.editedLocation.subdistrict,
+                        Detail: this.editedLocation.detail,
+                        isAnotherPerson:
+                            this.editedLocation.isAnotherPersonRecieve,
+                        f_name: this.editedLocation.anotherPerson.f_name,
+                        l_name: this.editedLocation.anotherPerson.l_name,
+                        phone_number:
+                            this.editedLocation.anotherPerson.phone_number,
+                    };
+
+                    try {
+                        const res = await api.updateLocation(
+                            this.editedLocation.id,
+                            data
+                        );
+                        console.log('✅ Location updated:', res);
+                    } catch (err) {
+                        console.error('❌ Failed to update location:', err);
+                    }
                 }
+
+                this.loadLocations();
+                this.toggle();
             }
         },
+        deleteLocationConfirm() {
+            api.deleteLocation(this.selectedId).then(() => {
+                this.removeModalVisible = false;
+                this.loadLocations();
+                if (this.locAddFormShow == true) {
+                    this.toggle();
+                }
+            });
+        },
         validate() {
+            let err = true;
             const name = this.editedLocation.name.trim();
-            // const city = this.editedLocation.city.trim();
             const district = this.editedLocation.district.trim();
             const subdistrict = this.editedLocation.subdistrict.trim();
-
-            // Check if any field is empty or contains only spaces
-            if (!name || !district || !subdistrict) {
-                alert(
-                    'All fields are required and cannot contain only spaces!'
-                );
-                return false;
+            const detail = this.editedLocation.detail.trim();
+            // Check if any field is empty or contains only s
+            if (!name) {
+                this.error.title = true;
+                err = false;
+            }
+            if (!district) {
+                this.error.district = true;
+                err = false;
+            }
+            if (!subdistrict) {
+                this.error.subdistrict = true;
+                err = false;
+            }
+            if (!detail) {
+                this.error.detail = true;
+                err = false;
             }
 
+            if (this.editedLocation.isAnotherPersonRecieve == true) {
+                const f = this.editedLocation.anotherPerson.f_name.trim();
+                const l = this.editedLocation.anotherPerson.l_name.trim();
+                const p = this.editedLocation.anotherPerson.phone_number;
+                if (!f) {
+                    this.error.f_name = true;
+                    err = false;
+                }
+                if (!l) {
+                    this.error.l_name = true;
+                    err = false;
+                }
+
+                if (!p || p.toString().length !== 8) {
+                    this.error.phone_number = true;
+                    err = false;
+                }
+            }
             // All fields are valid
-            return true;
+            return err;
+        },
+        async loadLocations() {
+            this.LocationItems = await api.getLocationsByUser(1);
+            console.log('we fetched locs', this.LocationItems);
+        },
+        loadCartItems() {
+            const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+            this.cartItems = storedCart.map((item) => ({
+                ...item,
+                quantity: item.quantity || 1, // Default to 1 if no quantity found
+            }));
         },
     },
 };
@@ -582,5 +840,39 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+}
+
+.err-txt {
+    color: red;
+    align-self: flex-end; /* ✅ Aligns the small tag to the right */
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+/deep/ input {
+    font-family: var(--text-font);
+}
+.border-danger:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.modal-btn.cancel {
+    background-color: gray;
+    color: white;
+}
+
+.modal-btn.confirm {
+    background-color: #6c63ff;
+    color: white;
+}
+
+/* Modal Buttons */
+.modal-btn {
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
 }
 </style>

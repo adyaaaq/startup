@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column" style="gap: 24px; margin: 0px 20px">
+    <div class="d-flex flex-column" style="gap: 24px">
         <div class="carousel-container">
             <div class="big-box"></div>
             <div class="small-boxes">
@@ -7,21 +7,20 @@
                 <div class="small-box blue-box"></div>
             </div>
         </div>
-        <div class="d-flex flex-row justify-content-between m-4">
+        <div class="d-flex flex-row justify-content-between">
             <span class="medium-title">Багцууд</span>
             <button class="show-all-btn" @click="goToProducts">
                 <span class="btn-text"> Бүгдийн үзэх </span>
             </button>
         </div>
         <div class="d-flex align-items-center justify-content-center w-100">
-            <div
-                class="d-flex justify-content-between flex-wrap gap-3 m-4 w-100">
+            <div class="d-flex justify-content-between flex-wrap gap-3 w-100">
                 <specialItem />
                 <specialItem />
                 <specialItem />
             </div>
         </div>
-        <div class="d-flex flex-row justify-content-between m-4">
+        <div class="d-flex flex-row justify-content-between">
             <span class="medium-title">Санал болгох</span>
             <button class="show-all-btn" @click="goToProducts">
                 <span class="btn-text"> Бүгдийн үзэх </span>
@@ -55,23 +54,24 @@ export default {
     data() {
         return {
             Products: [
-                {
-                    BranchId: 1,
-                    CategoryId: 1,
-                    Price: 30000,
-                    ProductId: 1,
-                    ProductName: 'ууыбы Арйоыбр',
-                },
-                {
-                    BranchId: 1,
-                    CategoryId: 1,
-                    Price: 35000,
-                    ProductId: 2,
-                    ProductName: 'ууыбы Арйоыбр',
-                },
+                // {
+                //     BranchId: 1,
+                //     CategoryId: 1,
+                //     Price: 30000,
+                //     ProductId: 1,
+                //     ProductName: 'ууыбы Арйоыбр',
+                // },
+                // {
+                //     BranchId: 1,
+                //     CategoryId: 1,
+                //     Price: 35000,
+                //     ProductId: 2,
+                //     ProductName: 'ууыбы Арйоыбр',
+                // },
             ],
         };
     },
+    mounted: {},
     methods: {
         goToProducts() {
             this.$router.push({ name: 'Products' }); // Ensure 'Products' route is defined
@@ -90,8 +90,6 @@ export default {
     gap: 20px;
     width: 100%;
     height: 500px;
-
-    padding: 20px;
 }
 
 /* Large Box */
@@ -161,7 +159,6 @@ export default {
 }
 
 .products-container {
-    margin: 0px 20px 20px 20px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;

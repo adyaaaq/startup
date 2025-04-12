@@ -2,13 +2,13 @@
     <button
         class="locItem-container gap-2"
         @click="selectItem"
-        :class="{ selected: selected === location.id }">
+        :class="{ selected: selected === location.LocationId }">
         <div class="d-flex flex-row gap-2">
             <input
                 type="radio"
                 :id="`location-${location.id}`"
                 :value="location.id"
-                :checked="selected === location.id"
+                :checked="selected === location.LocationId"
                 @change="selectItem" />
             <div class="d-flex flex-column">
                 <label for="option1" class="locTitle">{{
@@ -34,52 +34,6 @@
                     alt="Trash icon" />
             </button>
         </div>
-        <b-modal
-            v-model="editModalVisible"
-            title="Хүргэлтийн хаяг засах"
-            hide-footer
-            centered>
-            <div class="modal-body">
-                <p>Do you want to edit this location?</p>
-            </div>
-            <div class="d-flex justify-content-end gap-2 mt-3">
-                <button
-                    class="modal-btn cancel"
-                    @click="editModalVisible = false">
-                    Cancel
-                </button>
-                <button class="modal-btn confirm" @click="confirmEdit">
-                    Confirm
-                </button>
-            </div>
-        </b-modal>
-        <b-modal
-            v-model="removeModalVisible"
-            title="Хүргэлтийн хаяг устгах"
-            hide-footer
-            centered>
-            <div class="modal-body">
-                <div class="d-flex flex-row align-items-center">
-                    <h6 class="mb-0">{{ this.location.Title }}</h6>
-                    <p>
-                        - {{ this.location.Hot }}, {{ this.location.Duureg }},
-                        {{ this.location.Horoo }}
-                    </p>
-                </div>
-                <p>{{ this.location.detail }}</p>
-                <p>Та хүргэлтийн хаягийг устгахдаа итгэлтэй байна уу?</p>
-            </div>
-            <div class="d-flex justify-content-end gap-2 mt-3">
-                <button
-                    class="modal-btn cancel"
-                    @click="removeModalVisible = false">
-                    Cancel
-                </button>
-                <button class="modal-btn confirm" @click="confirmRemove">
-                    Remove
-                </button>
-            </div>
-        </b-modal>
     </button>
 
     <!-- Edit Confirmation Modal -->
@@ -92,6 +46,7 @@ export default {
         location: Object,
         selected: Number,
         edit: Function,
+        remove: Function,
     },
 
     data() {
@@ -106,8 +61,8 @@ export default {
     },
     methods: {
         selectItem() {
-            if (this.selected !== this.location.id) {
-                this.$emit('select', this.location.id);
+            if (this.selected !== this.location.LocationId) {
+                this.$emit('select', this.location.LocationId);
             }
         },
         showEditModal() {
@@ -115,15 +70,11 @@ export default {
             // this.editModalVisible = true;
         },
         showRemoveModal() {
-            this.removeModalVisible = true;
+            this.$emit('remove', this.location); // ✅ Emit to parent
         },
         confirmEdit() {
             console.log('Location edited!');
             this.editModalVisible = false;
-        },
-        confirmRemove() {
-            console.log('Location removed!');
-            this.removeModalVisible = false;
         },
     },
 };
@@ -173,29 +124,6 @@ export default {
     padding: 5px;
     display: flex;
     align-items: center;
-}
-
-/* Modal Buttons */
-.modal-btn {
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.modal-btn.cancel {
-    background-color: gray;
-    color: white;
-}
-
-.modal-btn.confirm {
-    background-color: #6c63ff;
-    color: white;
-}
-
-/deep/ .modal-header {
-    justify-content: space-between !important;
 }
 
 .add-icon-container {

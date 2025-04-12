@@ -55,6 +55,8 @@ export const getLocationsByUser = (userId) =>
     api.get(`/locations/user/${userId}`).then((res) => res.data);
 export const createLocation = (data) =>
     api.post('/locations', data).then((res) => res.data);
+export const updateLocation = (id, data) =>
+    api.put(`/locations/${id}`, data).then((res) => res.data);
 export const deleteLocation = (id) =>
     api.delete(`/locations/${id}`).then((res) => res.data);
 
@@ -80,5 +82,6 @@ export default {
     getLocations,
     getLocationsByUser,
     createLocation,
+    updateLocation,
     deleteLocation,
 };

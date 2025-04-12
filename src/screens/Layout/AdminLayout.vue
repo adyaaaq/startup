@@ -13,12 +13,22 @@
                 <router-link to="/admin/products" exact-active-class="active"
                     >Products</router-link
                 >
-                <router-link to="/admin/settings" exact-active-class="active"
-                    >Settings</router-link
-                >
             </nav>
+            <div class="logout" @click="$bvModal.show('logout-modal')">
+                Гарах
+            </div>
         </aside>
 
+        <!-- Confirmation Modal -->
+        <b-modal
+            id="logout-modal"
+            title="Баталгаажуулалт"
+            @ok="logout"
+            ok-title="Тийм"
+            cancel-title="Үгүй"
+            centered>
+            Та системээс гарахдаа итгэлтэй байна уу?
+        </b-modal>
         <!-- Main Content -->
         <div class="main-content">
             <header class="topbar">
@@ -35,6 +45,18 @@
 <script>
 export default {
     name: 'AdminLayout',
+    data() {
+        return {
+            showLogoutModal: false,
+        };
+    },
+    methods: {
+        logout() {
+            console.log('🚪 Logging out...');
+            // Clear session or token if needed
+            this.$router.push('/login'); // Or any route to redirect after logout
+        },
+    },
 };
 </script>
 
@@ -100,5 +122,21 @@ export default {
     padding: 24px;
     overflow-y: auto;
     height: 100%;
+}
+.logout {
+    margin-top: auto;
+    padding-top: 20px;
+    color: #ffdddd;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.logout:hover {
+    color: #ffffff;
+}
+
+/deep/ .modal-header {
+    justify-content: space-between !important;
 }
 </style>
