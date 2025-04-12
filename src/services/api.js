@@ -59,6 +59,40 @@ export const updateLocation = (id, data) =>
     api.put(`/locations/${id}`, data).then((res) => res.data);
 export const deleteLocation = (id) =>
     api.delete(`/locations/${id}`).then((res) => res.data);
+// ----------------------
+// Categories
+// ----------------------
+export const getCategories = () =>
+    api.get('/categories').then((res) => res.data);
+
+export const getCategory = (id) =>
+    api.get(`/categories/${id}`).then((res) => res.data);
+
+export const createCategory = (data) =>
+    api.post('/categories', data).then((res) => res.data);
+
+export const updateCategory = (id, data) =>
+    api.put(`/categories/${id}`, data).then((res) => res.data);
+
+export const deleteCategory = (id) =>
+    api.delete(`/categories/${id}`).then((res) => res.data);
+
+// ----------------------
+// Categories
+// ----------------------
+export const getBranches = () => api.get('/branches').then((res) => res.data);
+
+export const getBranch = (id) =>
+    api.get(`/branches/${id}`).then((res) => res.data);
+
+export const createBranch = (data) =>
+    api.post('/branches', data).then((res) => res.data);
+
+export const updateBranch = (id, data) =>
+    api.put(`/branches/${id}`, data).then((res) => res.data);
+
+export const deleteBranch = (id) =>
+    api.delete(`/branches/${id}`).then((res) => res.data);
 
 export default {
     getProducts,
@@ -84,4 +118,16 @@ export default {
     createLocation,
     updateLocation,
     deleteLocation,
+
+    getCategories,
+    getCategory,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+
+    getBranches,
+    getBranch,
+    createBranch,
+    updateBranch,
+    deleteBranch,
 };

@@ -15,6 +15,15 @@
             :items="products"
             :fields="fields"
             @row-clicked="openEditModal">
+            <!-- Show image -->
+            <template #cell(ImagePath)="data">
+                <img
+                    :src="getImageUrl(data.item.ImagePath)"
+                    alt="Product Image"
+                    style="height: 50px; border-radius: 4px" />
+            </template>
+
+            <!-- Action buttons -->
             <template #cell(actions)="row">
                 <b-button
                     size="sm"
@@ -38,18 +47,47 @@
             hide-footer>
             <b-form @submit.prevent="saveProduct">
                 <b-form-group label="Product Name">
-                    <b-form-input v-model="form.name" required />
+                    <b-form-input v-model="form.ProductName" required />
                 </b-form-group>
 
                 <b-form-group label="Price">
                     <b-form-input
-                        v-model.number="form.price"
+                        v-model.number="form.Price"
                         type="number"
                         required />
                 </b-form-group>
 
                 <b-form-group label="Category">
-                    <b-form-input v-model="form.category" required />
+                    <b-form-select
+                        v-model="form.CategoryId"
+                        :options="categories"
+                        required
+                        text-field="CategoryName"
+                        value-field="CategoryId"
+                        placeholder="Категори сонгох"
+                        class="form-select" />
+                </b-form-group>
+
+                <b-form-group label="Branch">
+                    <b-form-select
+                        v-model="form.BranchId"
+                        :options="branches"
+                        required
+                        text-field="BranchName"
+                        value-field="BranchId"
+                        placeholder="Салбар сонгох"
+                        class="form-select" />
+                </b-form-group>
+
+                <b-form-group label="Branch ID">
+                    <b-form-input
+                        v-model="form.BranchId"
+                        type="number"
+                        required />
+                </b-form-group>
+
+                <b-form-group label="Image Path">
+                    <b-form-input v-model="form.ImagePath" />
                 </b-form-group>
 
                 <div class="d-flex justify-content-end mt-3">
@@ -66,32 +104,61 @@
 </template>
 
 <script>
+import api from '@/services/api';
+
 export default {
     name: 'AdminProducts',
     data() {
         return {
-            products: [
-                { id: 1, name: 'Whiskey', price: 125, category: 'Spirits' },
-                { id: 2, name: 'Chardonnay', price: 80, category: 'Wine' },
-            ],
+            products: [],
+            categories: [],
+            branches: [],
             fields: [
-                { key: 'id', label: '#' },
-                { key: 'name', label: 'Name' },
-                { key: 'price', label: 'Price' },
-                { key: 'category', label: 'Category' },
+                { key: 'ProductId', label: '#' },
+                { key: 'ProductName', label: 'Name' },
+                { key: 'Price', label: 'Price' },
+                { key: 'CategoryName', label: 'CategoryName' },
+                { key: 'BranchName', label: 'Branch' },
+                { key: 'ImagePath', label: 'Image' }, // 👈 added this
                 { key: 'actions', label: 'Actions' },
             ],
+            form: {
+                ProductId: null,
+                ProductName: '',
+                Price: null,
+                CategoryId: null,
+                BranchId: null,
+                ImagePath: '',
+            },
+
             showModal: false,
             isEditing: false,
-            form: {
-                id: null,
-                name: '',
-                price: null,
-                category: '',
-            },
         };
     },
+    async mounted() {
+        const res = await api.getProducts();
+        const cats = await api.getCategories();
+        const branches = await api.getBranches();
+        this.products = res;
+        this.categories = cats;
+        this.branches = branches;
+        console.log('P in ADMIN', res);
+
+        console.log('branch in ADMIN', branches);
+        console.log('cats in ADMIN', cats);
+    },
     methods: {
+        getImageUrl(path) {
+            try {
+                // Dynamically require the asset if it starts with @
+                if (path.startsWith('@/')) {
+                    return require(`@/${path.replace('@/', '')}`);
+                }
+                return path; // fallback for full URLs
+            } catch (e) {
+                return ''; // fallback if image not found
+            }
+        },
         openCreateModal() {
             this.resetForm();
             this.isEditing = false;
