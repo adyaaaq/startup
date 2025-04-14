@@ -18,9 +18,13 @@
             <!-- Show image -->
             <template #cell(ImagePath)="data">
                 <img
-                    :src="getImageUrl(data.item.ImagePath)"
+                    :src="data.item.ImageUrl"
                     alt="Product Image"
                     style="height: 50px; border-radius: 4px" />
+                <!-- <img
+                    :src="getImageUrl(data.item.ImagePath)"
+                    alt="Product Image"
+                    style="height: 50px; border-radius: 4px" /> -->
             </template>
 
             <!-- Action buttons -->
@@ -44,7 +48,8 @@
         <b-modal
             v-model="showModal"
             :title="isEditing ? 'Edit Product' : 'Add Product'"
-            hide-footer>
+            hide-footer
+            @hide="resetModal">
             <b-form @submit.prevent="saveProduct">
                 <b-form-group label="Product Name">
                     <b-form-input v-model="form.ProductName" required />
@@ -54,6 +59,7 @@
                     <b-form-input
                         v-model.number="form.Price"
                         type="number"
+                        step="0.01"
                         required />
                 </b-form-group>
 
@@ -79,15 +85,36 @@
                         class="form-select" />
                 </b-form-group>
 
-                <b-form-group label="Branch ID">
-                    <b-form-input
-                        v-model="form.BranchId"
-                        type="number"
-                        required />
-                </b-form-group>
+                <b-form-group label="Product Image">
+                    <div class="d-flex align-items-center flex-column gap-4">
+                        <div class="d-flex flex-column">
+                            <img
+                                v-if="imagePreview"
+                                :src="imagePreview"
+                                alt="Preview"
+                                style="
+                                    height: 150px;
+                                    object-fit: cover;
+                                    border-radius: 4px;
+                                " />
 
-                <b-form-group label="Image Path">
-                    <b-form-input v-model="form.ImagePath" />
+                            <img
+                                v-else
+                                :src="form.ImageUrl"
+                                alt="Product Image"
+                                style="
+                                    height: 150px;
+                                    border-radius: 4px;
+                                    object-fit: cover;
+                                " />
+                        </div>
+                        <b-form-file
+                            @change="handleImageUpload"
+                            accept="image/*"
+                            browse-text="Choose Image"
+                            :state="!!form.ImageFile"
+                            plain />
+                    </div>
                 </b-form-group>
 
                 <div class="d-flex justify-content-end mt-3">
@@ -129,8 +156,11 @@ export default {
                 CategoryId: null,
                 BranchId: null,
                 ImagePath: '',
+
+                ImageFile: null, // For sending to server
             },
 
+            imagePreview: null, // ✅ preview image blob
             showModal: false,
             isEditing: false,
         };
@@ -148,6 +178,16 @@ export default {
         console.log('cats in ADMIN', cats);
     },
     methods: {
+        resetModal() {
+            this.imagePreview = null;
+        },
+        handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.imagePreview = URL.createObjectURL(file); // ✅ Instant preview
+                this.form.ImageFile = file; // ✅ Store file for later upload
+            }
+        },
         getImageUrl(path) {
             try {
                 // Dynamically require the asset if it starts with @
@@ -169,22 +209,50 @@ export default {
             this.isEditing = true;
             this.showModal = true;
         },
-        saveProduct() {
+        async saveProduct() {
             if (this.isEditing) {
-                const index = this.products.findIndex(
-                    (p) => p.id === this.form.id
-                );
-                if (index !== -1)
-                    this.products.splice(index, 1, { ...this.form });
+                // const index = this.products.findIndex(
+                //     (p) => p.id === this.form.id
+                // );
+                // if (index !== -1)
+                //     this.products.splice(index, 1, { ...this.form });
+                console.log(this.form.ProductName, this.form.Price);
+                console.log(this.form.BranchId, this.form.BranchName);
+                console.log(this.form.CategoryId, this.form.CategoryName);
+                const formData = new FormData();
+                formData.append('ProductName', this.form.ProductName);
+                formData.append('Price', this.form.Price);
+                formData.append('CategoryId', this.form.CategoryId);
+                formData.append('BranchId', this.form.BranchId);
+                formData.append('ImagePath', this.form.ImageFile.name || '');
+                if (this.form.ImageFile) {
+                    formData.append('ImageFile', this.form.ImageFile); // new image (if selected)
+                }
+
+                await api.updateProduct(this.form.ProductId, formData);
             } else {
-                this.form.id = Date.now();
-                this.products.push({ ...this.form });
+                console.log('editing 2');
+                console.log(this.form.ProductName, this.form.Price);
+                console.log(this.form.BranchId, this.form.BranchName);
+                console.log(this.form.CategoryId, this.form.CategoryName);
+                console.log(this.form.ImageFile.name);
+                const formData = new FormData();
+                formData.append('ProductName', this.form.ProductName);
+                formData.append('Price', this.form.Price);
+                formData.append('CategoryId', this.form.CategoryId);
+                formData.append('BranchId', this.form.BranchId);
+                formData.append('ImageFile', this.form.ImageFile); // 🔥 match .single('ImageFile')
+
+                await api.createProduct(formData);
             }
             this.showModal = false;
         },
         deleteProduct(product) {
-            this.products = this.products.filter((p) => p.id !== product.id);
+            this.products = this.products.filter(
+                (p) => p.ProductId !== product.ProductId
+            );
         },
+
         resetForm() {
             this.form = {
                 id: null,
