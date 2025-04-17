@@ -12,7 +12,14 @@ const api = axios.create({
 // ----------------------
 // Products
 // ----------------------
-export const getProducts = () => api.get('/products').then((res) => res.data);
+export const getProducts = (type = null) => {
+    const url = type
+        ? `/products?type=${encodeURIComponent(type)}`
+        : '/products';
+    return api.get(url).then((res) => res.data);
+};
+
+// Get a single product by ID
 export const getProduct = (id) =>
     api.get(`/products/${id}`).then((res) => res.data);
 export const createProduct = (data) =>
@@ -31,7 +38,6 @@ export const updateProduct = (id, data) =>
             },
         })
         .then((res) => res.data);
-
 export const deleteProduct = (id) =>
     api.delete(`/products/${id}`).then((res) => res.data);
 

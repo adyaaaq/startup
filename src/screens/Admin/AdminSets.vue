@@ -2,7 +2,7 @@
     <div class="admin-products">
         <div
             class="products-header d-flex justify-content-between align-items-center mb-3">
-            <h2>Products</h2>
+            <h2>Sets</h2>
             <b-form-group label="Select Category">
                 <b-form-select
                     v-model="selectedCategory"
@@ -143,7 +143,7 @@
 import api from '@/services/api';
 
 export default {
-    name: 'AdminProducts',
+    name: 'AdminSets',
     data() {
         return {
             products: [],

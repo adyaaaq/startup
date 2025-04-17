@@ -11,7 +11,13 @@
                     >Users</router-link
                 >
                 <router-link to="/admin/products" exact-active-class="active"
-                    >Products</router-link
+                    >Liqours</router-link
+                >
+                <router-link to="/admin/flowers" exact-active-class="active"
+                    >Flowers</router-link
+                >
+                <router-link to="/admin/sets" exact-active-class="active"
+                    >Sets</router-link
                 >
             </nav>
             <div class="logout" @click="$bvModal.show('logout-modal')">

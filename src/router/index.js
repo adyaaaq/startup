@@ -11,7 +11,8 @@ import Favorites from '@/screens/Favorites.vue';
 import Users from '@/screens/Admin/Users/Users.vue';
 import Dashboard from '@/screens/Admin/Dashboard/Dashboard.vue';
 import AdminProducts from '@/screens/Admin/AdminProducts.vue';
-
+import AdminFlowers from '@/screens/Admin/AdminFlowers.vue';
+import AdminSets from '@/screens/Admin/AdminSets.vue';
 import AdminLayout from '@/screens/Layout/AdminLayout.vue';
 
 Vue.use(Router);
@@ -78,6 +79,16 @@ export default new Router({
                     path: 'Products',
                     name: 'Products',
                     component: AdminProducts,
+                },
+                {
+                    path: 'Flowers',
+                    name: 'Flowers',
+                    component: AdminFlowers,
+                },
+                {
+                    path: 'Sets',
+                    name: 'Sets',
+                    component: AdminSets,
                 },
             ],
         },

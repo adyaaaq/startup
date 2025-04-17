@@ -2,7 +2,7 @@
     <div class="admin-products">
         <div
             class="products-header d-flex justify-content-between align-items-center mb-3">
-            <h2>Products</h2>
+            <h2>Flowers</h2>
             <b-form-group label="Select Category">
                 <b-form-select
                     v-model="selectedCategory"
@@ -143,7 +143,7 @@
 import api from '@/services/api';
 
 export default {
-    name: 'AdminProducts',
+    name: 'AdminFlowers',
     data() {
         return {
             products: [],
@@ -167,6 +167,7 @@ export default {
                 ImagePath: '',
 
                 ImageFile: null, // For sending to server
+                type: 2,
             },
 
             imagePreview: null, // ✅ preview image blob
@@ -176,7 +177,7 @@ export default {
         };
     },
     async mounted() {
-        const res = await api.getProducts();
+        const res = await api.getProducts(2);
         const cats = await api.getCategories();
         const branches = await api.getBranches();
         this.products = res;
@@ -234,6 +235,7 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
+                formData.append('Type', this.form.type);
                 formData.append('ImagePath', this.form.ImageFile.name || '');
                 if (this.form.ImageFile) {
                     formData.append('ImageFile', this.form.ImageFile); // new image (if selected)
@@ -251,13 +253,14 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
+                formData.append('Type', this.form.type);
                 formData.append('ImageFile', this.form.ImageFile); // 🔥 match .single('ImageFile')
 
                 await api.createProduct(formData);
             }
             this.showModal = false;
 
-            const res = await api.getProducts();
+            const res = await api.getProducts(2);
             this.products = res;
         },
         async deleteProduct(product) {
