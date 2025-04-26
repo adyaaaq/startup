@@ -16,6 +16,7 @@ import AdminFlowers from '@/screens/Admin/AdminFlowers.vue';
 import AdminSets from '@/screens/Admin/AdminSets.vue';
 import AdminLayout from '@/screens/Layout/AdminLayout.vue';
 import AdminCategories from '@/screens/Admin/AdminCategories.vue';
+import AdminBanner from '@/screens/Admin/AdminBanner.vue';
 Vue.use(Router);
 
 export default new Router({
@@ -101,6 +102,11 @@ export default new Router({
                     path: 'Categories',
                     name: 'Categories',
                     component: AdminCategories,
+                },
+                {
+                    path: 'Banners',
+                    name: 'Banners',
+                    component: AdminBanner,
                 },
             ],
         },

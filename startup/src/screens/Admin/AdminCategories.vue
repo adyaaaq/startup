@@ -13,7 +13,7 @@
                 v-model="selectedType"
                 :options="typeOptions"
                 @change="fetchCategories"
-                class="w-25" />
+                class="w-25 form-select" />
         </b-form-group>
 
         <!-- Category Groups -->

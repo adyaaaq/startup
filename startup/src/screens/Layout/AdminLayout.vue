@@ -22,6 +22,9 @@
                 <router-link to="/admin/categories" exact-active-class="active"
                     >Categories</router-link
                 >
+                <router-link to="/admin/banners" exact-active-class="active"
+                    >Banners</router-link
+                >
             </nav>
             <div class="logout" @click="$bvModal.show('logout-modal')">
                 Гарах
