@@ -6,8 +6,8 @@
             <b-form-group label="Select Category">
                 <b-form-select
                     v-model="selectedCategory"
-                    :options="categories"
-                    class="form-control"
+                    :options="computedCategories"
+                    class="form-select"
                     value-field="CategoryId"
                     text-field="CategoryName"
                     placeholder="Категори сонгох" />
@@ -21,7 +21,7 @@
         <b-table
             striped
             hover
-            :items="products"
+            :items="filteredProducts"
             :fields="fields"
             @row-clicked="openEditModal">
             <!-- Show image -->
@@ -141,7 +141,6 @@
 
 <script>
 import api from '@/services/api';
-
 export default {
     name: 'AdminFlowers',
     data() {
@@ -173,12 +172,13 @@ export default {
             imagePreview: null, // ✅ preview image blob
             showModal: false,
             isEditing: false,
-            selectedCategory: 1,
+            selectedCategory: 0,
+            showCategoryModal: false,
         };
     },
     async mounted() {
         const res = await api.getProducts(2);
-        const cats = await api.getCategories();
+        const cats = await api.getCategories(2);
         const branches = await api.getBranches();
         this.products = res;
         this.categories = cats;
@@ -221,7 +221,9 @@ export default {
             this.showModal = true;
         },
         async saveProduct() {
+            console.log('saving');
             if (this.isEditing) {
+                console.log('updating');
                 // const index = this.products.findIndex(
                 //     (p) => p.id === this.form.id
                 // );
@@ -230,14 +232,18 @@ export default {
                 console.log(this.form.ProductName, this.form.Price);
                 console.log(this.form.BranchId, this.form.BranchName);
                 console.log(this.form.CategoryId, this.form.CategoryName);
+                console.log(this.form);
                 const formData = new FormData();
                 formData.append('ProductName', this.form.ProductName);
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
-                formData.append('Type', this.form.type);
-                formData.append('ImagePath', this.form.ImageFile.name || '');
+                formData.append('Type', 2);
                 if (this.form.ImageFile) {
+                    formData.append(
+                        'ImagePath',
+                        this.form.ImageFile.name || ''
+                    );
                     formData.append('ImageFile', this.form.ImageFile); // new image (if selected)
                 }
 
@@ -253,7 +259,7 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
-                formData.append('Type', this.form.type);
+                formData.append('Type', 2);
                 formData.append('ImageFile', this.form.ImageFile); // 🔥 match .single('ImageFile')
 
                 await api.createProduct(formData);
@@ -267,7 +273,7 @@ export default {
             console.log(product.ProductId);
             await api.deleteProduct(product.ProductId);
 
-            const res = await api.getProducts();
+            const res = await api.getProducts(2);
             this.products = res;
         },
 
@@ -278,6 +284,23 @@ export default {
                 price: null,
                 category: '',
             };
+        },
+    },
+    computed: {
+        computedCategories() {
+            return [
+                { CategoryId: 0, CategoryName: 'All Categories' },
+                ...this.categories,
+            ];
+        },
+
+        filteredProducts() {
+            if (this.selectedCategory === 0) {
+                return this.products;
+            }
+            return this.products.filter(
+                (p) => p.CategoryId === this.selectedCategory
+            );
         },
     },
 };

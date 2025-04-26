@@ -1,8 +1,12 @@
 <template>
     <div class="bottle-item">
         <div class="image-container">
-            <img
+            <!-- <img
                 :src="require('@/assets/images/wine.png')"
+                alt="Bottle Image"
+                class="bottle-image" /> -->
+            <img
+                :src="product.ImageUrl"
                 alt="Bottle Image"
                 class="bottle-image" />
             <button
@@ -142,8 +146,9 @@ export default {
     transition: transform 0.3s ease-in-out;
 }
 .bottle-image {
-    width: 100px;
+    width: 200px;
     height: auto;
+    height: 200px;
 }
 .addicon {
     width: 16px;

@@ -81,8 +81,12 @@ export const deleteLocation = (id) =>
 // ----------------------
 // Categories
 // ----------------------
-export const getCategories = () =>
-    api.get('/categories').then((res) => res.data);
+export const getCategories = (type = null) => {
+    const url = type
+        ? `/categories?type=${encodeURIComponent(type)}`
+        : '/categories';
+    return api.get(url).then((res) => res.data);
+};
 
 export const getCategory = (id) =>
     api.get(`/categories/${id}`).then((res) => res.data);

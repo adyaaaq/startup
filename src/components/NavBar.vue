@@ -2,7 +2,10 @@
     <nav class="navbar">
         <div class="nav-container">
             <!-- Logo / Home -->
-            <router-link :to="{ name: 'Home' }" class="cart-link">
+            <router-link
+                :to="{ name: 'Home' }"
+                class="cart-link no-bg"
+                style="padding-left: 0px">
                 <div class="logo">
                     <span class="black-text">Mimi Liqour</span>
                     <span class="orange-text">Shop</span>
@@ -31,7 +34,10 @@
                 </router-link>
 
                 <!-- Cart -->
-                <router-link :to="{ name: 'Cart' }" class="cart-link">
+                <router-link
+                    :to="{ name: 'Cart' }"
+                    class="cart-link no-bg"
+                    style="padding-right: 0px">
                     <div class="cart">
                         <img
                             class="svgicon"
@@ -144,12 +150,31 @@ export default {
 }
 
 .auth-link {
-    margin-right: 15px;
     text-decoration: none;
     color: black;
     font-size: 14px;
 
     color: var(--text-color);
+}
+
+.cart-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.cart-link:hover:not(.no-bg),
+.cart-link.router-link-exact-active:not(.no-bg) {
+    background-color: white;
+}
+
+.router-link-exact-active:not(.no-bg) {
+    background-color: #007bff;
+    color: white;
 }
 
 .search-btn {

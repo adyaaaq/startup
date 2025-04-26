@@ -19,6 +19,9 @@
                 <router-link to="/admin/sets" exact-active-class="active"
                     >Sets</router-link
                 >
+                <router-link to="/admin/categories" exact-active-class="active"
+                    >Categories</router-link
+                >
             </nav>
             <div class="logout" @click="$bvModal.show('logout-modal')">
                 Гарах

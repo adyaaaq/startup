@@ -4,13 +4,19 @@
         <aside class="sidebar">
             <h3 class="sidebar-title">АНГИЛАЛУУД</h3>
             <ul class="category-list">
-                <li v-for="(category, index) in categories" :key="index">
+                <li
+                    v-for="(category, index) in computedCategories"
+                    :key="index"
+                    :class="{
+                        selected: selectedCategoryId === category.CategoryId,
+                    }"
+                    @click="selectCategory(category.CategoryId)">
                     <a
-                        style="font-family: var(--text-font)"
                         href="#"
                         @click.prevent
-                        >{{ category.name }}</a
-                    >
+                        style="font-family: var(--text-font)">
+                        {{ category.CategoryName }}
+                    </a>
                 </li>
             </ul>
 
@@ -18,6 +24,7 @@
             <h3 class="sidebar-title">Үнэ шүүлтүүр</h3>
             <div class="price-filter">
                 <input
+                    style="font-family: var(--text-font)"
                     type="number"
                     v-model.number="priceMin"
                     :min="minPrice"
@@ -26,28 +33,39 @@
                     class="form-control" />
                 <span>-</span>
                 <input
+                    style="font-family: var(--text-font)"
                     type="number"
                     v-model.number="priceMax"
                     :min="minPrice"
                     :max="maxPrice"
                     placeholder="Макс ₮"
                     class="form-control" />
+                ₮
             </div>
 
             <!-- Sorting Options -->
-            <h3 class="sidebar-title">ЭРЭМБЭЛЭХ</h3>
-            <select class="form-control" v-model="sortOption">
+            <h3 class="sidebar-title mt-3">ЭРЭМБЭЛЭХ</h3>
+            <select
+                class="form-select"
+                v-model="sortOption"
+                style="font-family: var(--text-font)">
                 <option value="name-asc">A-Я</option>
                 <option value="name-desc">Я-A</option>
                 <option value="price-asc">Үнэ өсөхөөр</option>
                 <option value="price-desc">Үнэ буурахаар</option>
             </select>
+            <button
+                style="font-family: var(--text-font)"
+                class="btn btn-outline-secondary w-100 mt-4"
+                @click="clearFilters">
+                цэвэрлэх
+            </button>
         </aside>
 
         <!-- Product Grid -->
         <main class="product-grid">
             <h2 class="product-header">
-                <strong>Бренд</strong> •
+                <strong>Шингэн зүйлс</strong> •
                 {{ sortedProducts.length }} Бүтээгдэхүүн
             </h2>
 
@@ -67,60 +85,25 @@
 import bottleItem from '@/components/bottleItem.vue';
 import api from '@/services/api';
 export default {
-    name: 'ProductsPage',
+    name: 'ProductssPage',
     components: { bottleItem },
     data() {
         return {
-            categories: [
-                { name: 'Бэлгийн Багц' },
-                { name: 'Sale' },
-                { name: 'Шар Айраг' },
-                { name: 'Бренд' },
-                { name: 'Шампейн' },
-                { name: 'Коньяк' },
-                { name: 'Жин' },
-                { name: 'Ликёр' },
-                { name: 'Мезкал' },
-                { name: 'Хатуулагтай Ундаа' },
-                { name: 'Ром' },
-                { name: 'Текила' },
-                { name: 'Виски' },
-                { name: 'Дарс' },
-                { name: 'Хатуулаггүй Бүтээгдэхүүн' },
-            ],
-            products: [
-                {
-                    name: 'Vecchia Romagna 1820 classica 70cl',
-                    price: 95000,
-                    image: require('@/assets/images/wine.png'),
-                },
-                {
-                    name: 'Vecchia Romagna 1820 etichetta nera 70cl',
-                    price: 117000,
-                    image: require('@/assets/images/wine.png'),
-                },
-                {
-                    name: 'Vecchia Romagna 1820 riserva tre botti 70cl',
-                    price: 210000,
-                    image: require('@/assets/images/wine.png'),
-                },
-                {
-                    name: 'Vecchia Romagna riserva 18YO 70cl',
-                    price: 693000,
-                    image: require('@/assets/images/wine.png'),
-                },
-                {
-                    name: 'Vecchia Romagna riserva 18YO 70cl',
-                    price: 693000,
-                    image: require('@/assets/images/wine.png'),
-                },
-            ],
+            categories: [],
+            products: [],
             priceMin: 0, // User-input min price
             priceMax: 1000000, // User-input max price
             sortOption: 'name-asc', // Default sorting option
+            selectedCategoryId: 0,
         };
     },
     methods: {
+        clearFilters() {
+            this.selectedCategoryId = 0;
+            this.priceMin = 0;
+            this.priceMax = 1000000;
+            this.sortOption = 'name-asc';
+        },
         handleFavorite(product) {
             let favorites = JSON.parse(
                 localStorage.getItem('favorites') || '[]'
@@ -136,11 +119,18 @@ export default {
             console.log('CART:', product);
             // Add to cart logic here
         },
+
+        selectCategory(id) {
+            this.selectedCategoryId = id;
+        },
     },
     async mounted() {
-        const res = await api.getProducts();
-        console.log('we got products', res);
+        const res = await api.getProducts(1);
+        const cats = await api.getCategories(1);
+        // console.log('we got products', res);
         this.products = res;
+        this.categories = cats;
+        console.log(this.categories);
     },
     computed: {
         minPrice() {
@@ -150,11 +140,15 @@ export default {
             return Math.max(...this.products.map((p) => p.Price));
         },
         filteredProducts() {
-            return this.products.filter(
-                (product) =>
+            return this.products.filter((product) => {
+                const priceMatch =
                     product.Price >= this.priceMin &&
-                    product.Price <= this.priceMax
-            );
+                    product.Price <= this.priceMax;
+                const categoryMatch =
+                    this.selectedCategoryId === 0 ||
+                    product.CategoryId === this.selectedCategoryId;
+                return priceMatch && categoryMatch;
+            });
         },
         sortedProducts() {
             let sorted = [...this.filteredProducts];
@@ -174,6 +168,12 @@ export default {
             }
 
             return sorted;
+        },
+        computedCategories() {
+            return [
+                { CategoryId: 0, CategoryName: 'Бүгд' },
+                ...this.categories,
+            ];
         },
     },
     watch: {
@@ -267,5 +267,21 @@ export default {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+}
+
+.category-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 12px;
+}
+
+.category-list li:hover {
+    background-color: #f0f0f0; /* light gray on hover */
+}
+
+.category-list li.selected {
+    background-color: #f0f0f0; /* blue or your primary */
+    color: white;
 }
 </style>

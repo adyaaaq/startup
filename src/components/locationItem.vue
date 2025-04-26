@@ -56,9 +56,7 @@ export default {
             removeModalVisible: false,
         };
     },
-    mounted() {
-        console.log('loc here: ', this.location);
-    },
+    mounted() {},
     methods: {
         selectItem() {
             if (this.selected !== this.location.LocationId) {

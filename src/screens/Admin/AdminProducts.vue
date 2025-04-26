@@ -6,8 +6,8 @@
             <b-form-group label="Select Category">
                 <b-form-select
                     v-model="selectedCategory"
-                    :options="categories"
-                    class="form-control"
+                    :options="computedCategories"
+                    class="form-select"
                     value-field="CategoryId"
                     text-field="CategoryName"
                     placeholder="Категори сонгох" />
@@ -21,7 +21,7 @@
         <b-table
             striped
             hover
-            :items="products"
+            :items="filteredProducts"
             :fields="fields"
             @row-clicked="openEditModal">
             <!-- Show image -->
@@ -172,12 +172,12 @@ export default {
             imagePreview: null, // ✅ preview image blob
             showModal: false,
             isEditing: false,
-            selectedCategory: 1,
+            selectedCategory: 0,
         };
     },
     async mounted() {
-        const res = await api.getProducts();
-        const cats = await api.getCategories();
+        const res = await api.getProducts(1);
+        const cats = await api.getCategories(1);
         const branches = await api.getBranches();
         this.products = res;
         this.categories = cats;
@@ -234,8 +234,12 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
-                formData.append('ImagePath', this.form.ImageFile.name || '');
+                formData.append('Type', 1);
                 if (this.form.ImageFile) {
+                    formData.append(
+                        'ImagePath',
+                        this.form.ImageFile.name || ''
+                    );
                     formData.append('ImageFile', this.form.ImageFile); // new image (if selected)
                 }
 
@@ -251,20 +255,21 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
+                formData.append('Type', 1);
                 formData.append('ImageFile', this.form.ImageFile); // 🔥 match .single('ImageFile')
 
                 await api.createProduct(formData);
             }
             this.showModal = false;
 
-            const res = await api.getProducts();
+            const res = await api.getProducts(1);
             this.products = res;
         },
         async deleteProduct(product) {
             console.log(product.ProductId);
             await api.deleteProduct(product.ProductId);
 
-            const res = await api.getProducts();
+            const res = await api.getProducts(1);
             this.products = res;
         },
 
@@ -275,6 +280,23 @@ export default {
                 price: null,
                 category: '',
             };
+        },
+    },
+    computed: {
+        computedCategories() {
+            return [
+                { CategoryId: 0, CategoryName: 'All Categories' },
+                ...this.categories,
+            ];
+        },
+
+        filteredProducts() {
+            if (this.selectedCategory === 0) {
+                return this.products;
+            }
+            return this.products.filter(
+                (p) => p.CategoryId === this.selectedCategory
+            );
         },
     },
 };

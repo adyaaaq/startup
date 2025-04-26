@@ -17,7 +17,89 @@
         <div class="d-flex flex-row gap-4 flex-wrap">
             <div class="d-flex col flex-column">
                 <h4 class="mt-4 mb-3">Миний сагс</h4>
-                <table class="cart-table">
+                <div
+                    v-if="this.cartItems.length > 0"
+                    class="d-flex flex-column gap-2">
+                    <div
+                        class="d-flex flex-row align-items-center w-100 gap-2"
+                        v-for="(item, index) in cartItems"
+                        :key="index">
+                        <div>
+                            <input
+                                type="checkbox"
+                                :checked="
+                                    selectedCartItems.includes(item.ProductId)
+                                "
+                                @change="cartItemChanging(item.ProductId)"
+                                class="checkbox" />
+                        </div>
+                        <div
+                            class="d-flex flex-row align-items-center justify-content-between w-100 cart-item"
+                            :class="{
+                                selected: selectedCartItems.includes(
+                                    item.ProductId
+                                ),
+                            }">
+                            <div class="d-flex flex-row gap-3">
+                                <div class="product-image-container">
+                                    <img
+                                        :src="item.ImageUrl"
+                                        class="product-image"
+                                        alt="Product Image" />
+                                </div>
+                                <div
+                                    class="d-flex flex-column gap-2 justify-content-between">
+                                    <p class="product-name mb-0">
+                                        {{ item.ProductName }}
+                                    </p>
+                                    <p class="product-id mb-0">
+                                        {{ item.Price }}₮
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="col-5 d-flex flex-row align-items-center justify-content-between">
+                                <div class="product-quantity">
+                                    <button
+                                        style="background-color: none"
+                                        @click="decreaseQuantity(index)">
+                                        −
+                                    </button>
+                                    <input
+                                        type="text"
+                                        v-model="item.quantity"
+                                        readonly />
+                                    <button
+                                        style="background-color: white"
+                                        @click="increaseQuantity(index)">
+                                        +
+                                    </button>
+                                </div>
+                                <div class="product-price">
+                                    {{ item.Price.toFixed(2) }} ₮
+                                </div>
+                                <div>
+                                    <button
+                                        class="remove-btn"
+                                        @click="removeItem(index)">
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    v-else
+                    class="d-flex flex-column align-items-center justify-content-center gap-2"
+                    style="height: 200px">
+                    <img
+                        style="height: 50px"
+                        :src="require('@/assets/svgicons/box.svg')"
+                        alt="empty icon" />
+                    <p>Таны сагс хоосон байна.</p>
+                </div>
+                <!-- <table class="cart-table" v-if="this.cartItems.length > 0">
                     <thead class="cart-table-thead">
                         <tr>
                             <th>Бүтээгдэхүүн</th>
@@ -88,11 +170,77 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </table> -->
+
+                <h4 class="mt-4 mb-3">Захиалагчийн мэдээлэл</h4>
+                <div class="d-flex flex-row flex-wrap w-100 gap-3">
+                    <div class="row-2 d-flex flex-row gap-3 align-items-end">
+                        <div class="d-flex flex-column gap-1 w-100">
+                            <div class="d-flex flex-row">
+                                <span class="text-danger">* </span>&nbsp;
+                                <p>Нэр</p>
+                            </div>
+                            <input
+                                type="text"
+                                v-model="customerInfo.f_name"
+                                placeholder="Нэр"
+                                class="form-control custom-placeholder"
+                                :class="{
+                                    'border-danger': customerError.f_name,
+                                }"
+                                maxlength="100"
+                                @input="customerError.f_name = false" />
+                        </div>
+                        <div class="d-flex flex-column gap-1 w-100">
+                            <div class="d-flex flex-row">
+                                <span class="text-danger">* </span>&nbsp;
+                                <p>Овог</p>
+                            </div>
+                            <input
+                                type="text"
+                                v-model="customerInfo.l_name"
+                                placeholder="Овог"
+                                class="form-control custom-placeholder"
+                                :class="{
+                                    'border-danger': customerError.l_name,
+                                }"
+                                @input="customerError.l_name = false"
+                                maxlength="50" />
+                        </div>
+                        <div class="d-flex flex-column gap-1 w-100">
+                            <div class="d-flex flex-row">
+                                <span class="text-danger">* </span>&nbsp;
+                                <p>Утасны дугаар</p>
+                            </div>
+                            <input
+                                type="text"
+                                v-model="customerInfo.phone_number"
+                                placeholder="Утасны дугаар"
+                                class="form-control custom-placeholder"
+                                :class="{
+                                    'border-danger': customerError.phone_number,
+                                }"
+                                @input="customerError.phone_number = false"
+                                maxlength="50" />
+                        </div>
+                    </div>
+                </div>
+                <h4 class="mt-4 mb-3">Төлбөрийн төрөл</h4>
+                <div class="bank-grid">
+                    <BankItem
+                        v-for="bank in banks"
+                        :key="bank.id"
+                        :bank-id="bank.id"
+                        :title="bank.title"
+                        :description="bank.description"
+                        :image="bank.image"
+                        :selected-id="selectedBankId"
+                        @select="selectedBankId = $event" />
+                </div>
             </div>
             <div class="d-flex col flex-column">
                 <h4 class="mt-4 mb-3">Хүргэлтийн хаяг</h4>
-                <div class="d-flex flex-column justify-content-between h-100">
+                <div class="d-flex flex-column h-100">
                     <div
                         class="d-flex loc-cont flex-wrap justify-content-between">
                         <locationItem
@@ -239,27 +387,25 @@
                                     @input="limitPhoneNumber($event)" />
                             </div>
                         </div>
-                        <div>
-                            <div class="d-flex flex-column gap-1">
-                                <div class="d-flex flex-row">
-                                    <span class="text-danger">* </span>&nbsp;
-                                    <p>Дэлгэрэнгүй мэдээлэл</p>
-                                </div>
-                                <textarea
-                                    v-model="editedLocation.detail"
-                                    placeholder="Та хаягаа зөв дэлгэрэнгүй, тодорхой оруулаагүйгээс үүдэн хүргэлт удаашрах, эсвэл хүргэгдэхгүй байж болзошгүйг анхаарна уу."
-                                    class="form-control custom-placeholder"
-                                    style="
-                                        height: 74px;
-                                        overflow-y: auto;
-                                        resize: none;
-                                    "
-                                    maxlength="250"
-                                    :class="{
-                                        'border-danger': error.detail,
-                                    }"
-                                    @input="error.detail = false"></textarea>
+                        <div class="d-flex flex-column gap-1">
+                            <div class="d-flex flex-row">
+                                <span class="text-danger">* </span>&nbsp;
+                                <p>Дэлгэрэнгүй мэдээлэл</p>
                             </div>
+                            <textarea
+                                v-model="editedLocation.detail"
+                                placeholder="Та хаягаа зөв дэлгэрэнгүй, тодорхой оруулаагүйгээс үүдэн хүргэлт удаашрах, эсвэл хүргэгдэхгүй байж болзошгүйг анхаарна уу."
+                                class="form-control custom-placeholder"
+                                style="
+                                    height: 74px;
+                                    overflow-y: auto;
+                                    resize: none;
+                                "
+                                maxlength="250"
+                                :class="{
+                                    'border-danger': error.detail,
+                                }"
+                                @input="error.detail = false"></textarea>
                         </div>
                     </div>
                 </div>
@@ -277,14 +423,16 @@
             </div>
             <div class="summary-box">
                 <p class="total">
-                    Нийт төлбөр: <span> {{ total.toFixed(2) }}₮</span>
+                    Нийт төлбөр :
+                    <span> {{ totalPrice.toLocaleString() }}₮</span>
                 </p>
             </div>
         </div>
+
         <!-- Buttons -->
         <div class="cart-buttons">
             <!-- <button class="back-btn">Back to Shop</button> -->
-            <button class="checkout-btn">Үргэлжүүлэх</button>
+            <button class="checkout-btn" @click="confirm">Үргэлжлүүлэх</button>
         </div>
 
         <b-modal
@@ -318,16 +466,18 @@
 
 <script>
 import locationItem from '@/components/locationItem.vue';
+import BankItem from '@/components/banktem.vue';
 import { EventBus } from '@/Utils/eventBus';
 import api from '@/services/api';
 
 export default {
     name: 'CartPage',
-    components: { locationItem },
+    components: { locationItem, BankItem },
     data() {
         return {
             cartItems: [],
             LocationItems: [],
+            selectedCartItems: [],
             deliveryFee: 20.0,
             selectedId: null,
             selectedLocation: null,
@@ -347,7 +497,11 @@ export default {
                     phone_number: null,
                 },
             },
-
+            customerInfo: {
+                f_name: '',
+                l_name: '',
+                phone_number: null,
+            },
             locBtnText: 'Нэмэх',
             op: 1,
             error: {
@@ -359,7 +513,46 @@ export default {
                 l_name: false,
                 phone_number: false,
             },
+            customerError: {
+                f_name: false,
+                l_name: false,
+                phone_number: false,
+                email: false,
+            },
             removeModalVisible: false,
+            selectedBankId: null,
+            banks: [
+                {
+                    id: 1,
+                    title: 'Social Pay',
+                    description: 'Social pay ашиглан төлөх',
+                    image: require('@/assets/banks/socialpay.png'),
+                },
+                {
+                    id: 2,
+                    title: 'Monpay',
+                    description: 'апп-р төлөх',
+                    image: require('@/assets/banks/monpay.png'),
+                },
+                {
+                    id: 3,
+                    title: 'KhanBank',
+                    description: 'апп-р төлөх',
+                    image: require('@/assets/banks/khan.png'),
+                },
+                {
+                    id: 4,
+                    title: 'hiPay',
+                    description: 'апп-р төлөх',
+                    image: require('@/assets/banks/hipay.png'),
+                },
+                {
+                    id: 5,
+                    title: 'Mbank',
+                    description: 'апп-р төлөх',
+                    image: require('@/assets/banks/mbank.png'),
+                },
+            ],
         };
     },
     async mounted() {
@@ -373,14 +566,33 @@ export default {
                 0
             );
         },
-        total() {
-            return this.subtotal + this.deliveryFee;
+        totalPrice() {
+            return this.cartItems.reduce(
+                (sum, item) => sum + item.Price * item.quantity,
+                0
+            );
         },
     },
     methods: {
-        showModal(op, item) {
+        confirm() {
+            if (this.validate(2)) {
+                console.log('confirming');
+            } else {
+                console.log('error');
+            }
+        },
+        cartItemChanging(id) {
+            const index = this.selectedCartItems.indexOf(id);
+            if (index !== -1) {
+                // Remove item
+                this.selectedCartItems.splice(index, 1);
+            } else {
+                // Add item
+                this.selectedCartItems.push(id);
+            }
+        },
+        showModal(op) {
             if (op == 1) {
-                console.log('removing location', item);
                 this.removeModalVisible = true;
             }
         },
@@ -440,7 +652,6 @@ export default {
             EventBus.$emit('cart-updated', this.cartItems);
         },
         toggle() {
-            console.log('locAddFormShow', this.locAddFormShow);
             this.locAddFormShow = !this.locAddFormShow;
             this.locBtnText = 'Нэмэх';
 
@@ -463,7 +674,6 @@ export default {
             this.selectedLocation = this.LocationItems.find(
                 (i) => i.LocationId === id
             );
-            console.log('Selected location ID:', id);
         },
         openEditModal(item) {
             this.error.title = false;
@@ -493,10 +703,8 @@ export default {
             this.locBtnText = 'Хадгалах';
         },
         async saveLocation() {
-            if (this.validate()) {
+            if (this.validate(1)) {
                 if (this.op == 1) {
-                    console.log('creating loc', this.editedLocation);
-
                     let data = {
                         UserId: 1,
                         Title: this.editedLocation.name,
@@ -561,46 +769,74 @@ export default {
                 }
             });
         },
-        validate() {
+        validate(op) {
             let err = true;
-            const name = this.editedLocation.name.trim();
-            const district = this.editedLocation.district.trim();
-            const subdistrict = this.editedLocation.subdistrict.trim();
-            const detail = this.editedLocation.detail.trim();
-            // Check if any field is empty or contains only s
-            if (!name) {
-                this.error.title = true;
-                err = false;
-            }
-            if (!district) {
-                this.error.district = true;
-                err = false;
-            }
-            if (!subdistrict) {
-                this.error.subdistrict = true;
-                err = false;
-            }
-            if (!detail) {
-                this.error.detail = true;
-                err = false;
-            }
-
-            if (this.editedLocation.isAnotherPersonRecieve == true) {
-                const f = this.editedLocation.anotherPerson.f_name.trim();
-                const l = this.editedLocation.anotherPerson.l_name.trim();
-                const p = this.editedLocation.anotherPerson.phone_number;
-                if (!f) {
-                    this.error.f_name = true;
+            if (op == 1) {
+                const name = this.editedLocation.name.trim();
+                const district = this.editedLocation.district.trim();
+                const subdistrict = this.editedLocation.subdistrict.trim();
+                const detail = this.editedLocation.detail.trim();
+                // Check if any field is empty or contains only s
+                if (!name) {
+                    this.error.title = true;
                     err = false;
                 }
-                if (!l) {
-                    this.error.l_name = true;
+                if (!district) {
+                    this.error.district = true;
+                    err = false;
+                }
+                if (!subdistrict) {
+                    this.error.subdistrict = true;
+                    err = false;
+                }
+                if (!detail) {
+                    this.error.detail = true;
                     err = false;
                 }
 
-                if (!p || p.toString().length !== 8) {
-                    this.error.phone_number = true;
+                if (this.editedLocation.isAnotherPersonRecieve == true) {
+                    const f = this.editedLocation.anotherPerson.f_name.trim();
+                    const l = this.editedLocation.anotherPerson.l_name.trim();
+                    const p = this.editedLocation.anotherPerson.phone_number;
+                    if (!f) {
+                        this.error.f_name = true;
+                        err = false;
+                    }
+                    if (!l) {
+                        this.error.l_name = true;
+                        err = false;
+                    }
+
+                    if (!p || p.toString().length !== 8) {
+                        this.error.phone_number = true;
+                        err = false;
+                    }
+                }
+            }
+            if (op == 2) {
+                if (this.cartItems.length == 0) {
                     err = false;
+                } else {
+                    const fname = this.customerInfo.f_name.trim();
+                    const lname = this.customerInfo.l_name.trim();
+                    if (!fname) {
+                        this.customerError.f_name = true;
+                        err = false;
+                    }
+                    if (!lname) {
+                        this.customerError.l_name = true;
+                        err = false;
+                    }
+
+                    const p = this.customerInfo.phone_number;
+                    if (!p || p.toString().length !== 8) {
+                        this.customerError.phone_number = true;
+                        err = false;
+                    }
+                    if (this.selectedBankId == null) {
+                        console.log('bank song');
+                        err = false;
+                    }
                 }
             }
             // All fields are valid
@@ -608,7 +844,6 @@ export default {
         },
         async loadLocations() {
             this.LocationItems = await api.getLocationsByUser(1);
-            console.log('we fetched locs', this.LocationItems);
         },
         loadCartItems() {
             const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -616,6 +851,7 @@ export default {
                 ...item,
                 quantity: item.quantity || 1, // Default to 1 if no quantity found
             }));
+            console.log(this.cartItems);
         },
     },
 };
@@ -874,5 +1110,27 @@ export default {
     cursor: pointer;
     border-radius: 5px;
     font-size: 14px;
+}
+.bank-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.bank-grid ::v-deep .bank-item {
+    flex: 1 1 calc(50% - 8px); /* 2 items per row with 16px gap */
+    box-sizing: border-box;
+}
+.cart-item {
+    background-color: white;
+    border-radius: 12px;
+    padding: 12px;
+    border: 2px solid transparent;
+    transition: 0.2s;
+}
+
+.cart-item.selected {
+    background-color: #eaf3ff;
+    border-color: #007bff;
 }
 </style>

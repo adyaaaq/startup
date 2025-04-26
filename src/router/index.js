@@ -14,7 +14,7 @@ import AdminProducts from '@/screens/Admin/AdminProducts.vue';
 import AdminFlowers from '@/screens/Admin/AdminFlowers.vue';
 import AdminSets from '@/screens/Admin/AdminSets.vue';
 import AdminLayout from '@/screens/Layout/AdminLayout.vue';
-
+import AdminCategories from '@/screens/Admin/AdminCategories.vue';
 Vue.use(Router);
 
 export default new Router({
@@ -89,6 +89,11 @@ export default new Router({
                     path: 'Sets',
                     name: 'Sets',
                     component: AdminSets,
+                },
+                {
+                    path: 'Categories',
+                    name: 'Categories',
+                    component: AdminCategories,
                 },
             ],
         },

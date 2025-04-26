@@ -982,4 +982,7 @@ input::-webkit-inner-spin-button {
     font-size: 14px;
     opacity: 1;
 }
+button {
+    font-family: var(--text-font);
+}
 </style>
