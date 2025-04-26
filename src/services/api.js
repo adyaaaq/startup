@@ -12,10 +12,18 @@ const api = axios.create({
 // ----------------------
 // Products
 // ----------------------
-export const getProducts = (type = null) => {
-    const url = type
-        ? `/products?type=${encodeURIComponent(type)}`
-        : '/products';
+export const getProducts = (type = null, isSuggest = null) => {
+    const params = new URLSearchParams();
+
+    if (type !== null) {
+        params.append('type', type);
+    }
+
+    if (isSuggest !== null) {
+        params.append('isSuggest', isSuggest);
+    }
+
+    const url = `/products${params.toString() ? '?' + params.toString() : ''}`;
     return api.get(url).then((res) => res.data);
 };
 

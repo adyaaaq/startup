@@ -1,19 +1,24 @@
 <template>
     <div class="sale-item-container">
         <div class="d-flex flex-column item-texts">
-            <span>asd</span>
-            <span>asd</span>
+            <span style="font-size: large; font-weight: 600">{{
+                this.product.ProductName
+            }}</span>
+            <span>{{ this.product.Price }}₮</span>
         </div>
-        <img
-            class="item-img"
-            :src="require('@/assets/images/wine.png')"
-            alt="My Image" />
+        <img class="item-img" :src="product.ImageUrl" alt="Suggested Set" />
     </div>
 </template>
 
 <script>
 export default {
+    props: {
+        product: Object,
+    },
     name: 'SpecialItem',
+    mounted() {
+        console.log(this.product);
+    },
 };
 </script>
 
@@ -21,11 +26,11 @@ export default {
 /* Container */
 
 .sale-item-container {
-    background-color: #eeeeee;
+    background-color: white !important;
     border-radius: 20px;
     padding: 20px;
     display: flex;
-    width: 300px;
+    width: 470px !important;
     flex-direction: row;
     justify-content: space-between;
 }
@@ -36,6 +41,6 @@ export default {
     justify-content: end;
 }
 .item-img {
-    height: 200px;
+    height: 300px;
 }
 </style>

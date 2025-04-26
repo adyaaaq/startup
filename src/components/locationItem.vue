@@ -79,10 +79,6 @@ export default {
 </script>
 
 <style scoped>
-.locItem-container.selected {
-    border: 2px solid #6c63ff;
-    background-color: #f5f5ff;
-}
 .locItem-container {
     min-width: 300px;
     display: flex;
@@ -90,11 +86,22 @@ export default {
     align-items: center;
     gap: 4px;
     justify-content: space-between;
-    background-color: #eeeeee;
+    background-color: white !important;
     border-radius: 12px;
     padding: 12px;
     flex: 1;
     border: 0px;
+    transition: transform 0.2s, box-shadow 0.2s; /* ✅ add transition here */
+}
+
+.locItem-container.selected {
+    border: 2px solid #007bff;
+    background-color: #f0f8ff !important;
+}
+
+.locItem-container:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px); /* ✅ remove !important */
 }
 
 .locTitle {

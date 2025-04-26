@@ -160,7 +160,7 @@ export default {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: white;
+    background: transparent; /* ✅ transparent background */
     border: none;
     font-size: 18px;
     width: 25px;

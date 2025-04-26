@@ -2,11 +2,11 @@
     <div class="cart-page">
         <div class="d-flex flex-row gap-3 align-items-center">
             <p class="direction" style="color: orange">Миний сагс</p>
-            <img
+            <!-- <img
                 :src="require('@/assets/svgicons/next.svg')"
                 class="lil-icon"
-                alt="next icon" />
-            <p class="direction">Захиалгын хаяг</p>
+                alt="next icon" /> -->
+            <!-- <p class="direction">Захиалгын хаяг</p> -->
             <img
                 :src="require('@/assets/svgicons/next.svg')"
                 class="lil-icon"
@@ -19,7 +19,7 @@
                 <h4 class="mt-4 mb-3">Миний сагс</h4>
                 <div
                     v-if="this.cartItems.length > 0"
-                    class="d-flex flex-column gap-2">
+                    class="d-flex flex-column gap-4">
                     <div
                         class="d-flex flex-row align-items-center w-100 gap-2"
                         v-for="(item, index) in cartItems"
@@ -39,7 +39,8 @@
                                 selected: selectedCartItems.includes(
                                     item.ProductId
                                 ),
-                            }">
+                            }"
+                            @click="cartItemChanging(item.ProductId)">
                             <div class="d-flex flex-row gap-3">
                                 <div class="product-image-container">
                                     <img
@@ -61,7 +62,7 @@
                                 class="col-5 d-flex flex-row align-items-center justify-content-between">
                                 <div class="product-quantity">
                                     <button
-                                        style="background-color: none"
+                                        style="background-color: transparent"
                                         @click="decreaseQuantity(index)">
                                         −
                                     </button>
@@ -70,7 +71,7 @@
                                         v-model="item.quantity"
                                         readonly />
                                     <button
-                                        style="background-color: white"
+                                        style="background-color: transparent"
                                         @click="increaseQuantity(index)">
                                         +
                                     </button>
@@ -946,6 +947,7 @@ export default {
 }
 
 .product-price {
+    font-family: var(--text-font);
     font-size: 14px;
     text-align: center;
     font-weight: bold;
@@ -1129,8 +1131,13 @@ export default {
     transition: 0.2s;
 }
 
+.cart-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
 .cart-item.selected {
-    background-color: #eaf3ff;
+    background-color: #f0f8ff;
     border-color: #007bff;
 }
 </style>

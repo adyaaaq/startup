@@ -20,6 +20,9 @@
                 <router-link :to="{ name: 'Flowers' }" class="cart-link">
                     <span class="auth-link">Цэцэг </span>
                 </router-link>
+                <router-link :to="{ name: 'Sets' }" class="cart-link">
+                    <span class="auth-link">Багц </span>
+                </router-link>
                 <router-link :to="{ name: 'Login' }" class="cart-link">
                     <span class="auth-link">Нэвтрэх</span>
                 </router-link>

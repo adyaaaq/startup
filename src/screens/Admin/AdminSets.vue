@@ -178,7 +178,7 @@ export default {
     },
     async mounted() {
         const res = await api.getProducts(3);
-        const cats = await api.getCategories();
+        const cats = await api.getCategories(3);
         const branches = await api.getBranches();
         this.products = res;
         this.categories = cats;
