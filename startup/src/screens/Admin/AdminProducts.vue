@@ -30,10 +30,11 @@
                     :src="data.item.ImageUrl"
                     alt="Product Image"
                     style="height: 50px; border-radius: 4px" />
-                <!-- <img
-                    :src="getImageUrl(data.item.ImagePath)"
-                    alt="Product Image"
-                    style="height: 50px; border-radius: 4px" /> -->
+            </template>
+            <template #cell(description)="data">
+                <div
+                    class="quill-content text-wrap w-100"
+                    v-html="data.item.description"></div>
             </template>
 
             <!-- Action buttons -->
@@ -92,6 +93,13 @@
                         value-field="BranchId"
                         placeholder="Салбар сонгох"
                         class="form-select" />
+                </b-form-group>
+
+                <b-form-group label="Description">
+                    <quill-editor
+                        class="mt-3 mb-3"
+                        v-model="form.description"
+                        :options="editorOptions"></quill-editor>
                 </b-form-group>
 
                 <b-form-group label="Product Image">
@@ -153,6 +161,7 @@ export default {
                 { key: 'ProductId', label: '#' },
                 { key: 'ProductName', label: 'Name' },
                 { key: 'Price', label: 'Price' },
+                { key: 'description', label: 'Description' },
                 { key: 'CategoryName', label: 'CategoryName' },
                 { key: 'BranchName', label: 'Branch' },
                 { key: 'ImagePath', label: 'Image' }, // 👈 added this
@@ -165,7 +174,7 @@ export default {
                 CategoryId: null,
                 BranchId: null,
                 ImagePath: '',
-
+                description: 'test',
                 ImageFile: null, // For sending to server
             },
 
@@ -173,6 +182,17 @@ export default {
             showModal: false,
             isEditing: false,
             selectedCategory: 0,
+            editorOptions: {
+                // modules: {
+                //   toolbar: [
+                //     [{ header: [1, 2, false] }],
+                //     ['bold', 'italic', 'underline'],
+                //     ['image', 'code-block'],
+                //   ],
+                // },
+                placeholder: 'Даалгаврын агуулга',
+                theme: 'snow', // or 'bubble'
+            },
         };
     },
     async mounted() {
@@ -235,6 +255,7 @@ export default {
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
                 formData.append('Type', 1);
+                formData.append('description', this.form.description);
                 if (this.form.ImageFile) {
                     formData.append(
                         'ImagePath',
@@ -256,6 +277,7 @@ export default {
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
                 formData.append('Type', 1);
+                formData.append('description', this.form.description);
                 formData.append('ImageFile', this.form.ImageFile); // 🔥 match .single('ImageFile')
 
                 await api.createProduct(formData);

@@ -85,6 +85,7 @@ export default {
     async mounted() {
         const res = await api.getProducts(1, 1);
         this.Products = res;
+        console.log(this.Products);
         const flowers = await api.getProducts(2, 1);
         this.Flowers = flowers;
         const sets = await api.getProducts(3, 1);

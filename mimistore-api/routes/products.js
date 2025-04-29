@@ -58,7 +58,26 @@ router.get('/:id', (req, res) => {
         [req.params.id],
         (err, result) => {
             if (err) return res.status(500).send(err);
-            res.json(result[0]);
+
+            if (result.length === 0) {
+                return res.status(404).send({ message: 'Product not found' });
+            }
+
+            const p = result[0];
+
+            const fixed = {
+                ...p,
+                Price: Number(p.Price),
+                BranchId: Number(p.BranchId),
+                CategoryId: Number(p.CategoryId),
+                ProductId: Number(p.ProductId),
+                Type: p.Type,
+                ImageUrl: p.ImagePath
+                    ? `http://localhost:5000/images/Liqour/${p.ImagePath}`
+                    : null,
+            };
+
+            res.json(fixed);
         }
     );
 });
@@ -77,12 +96,21 @@ const upload = multer({ storage });
 
 // POST new product
 router.post('/', upload.single('ImageFile'), (req, res) => {
-    const { ProductName, Price, CategoryId, BranchId, Type } = req.body;
+    const { ProductName, Price, CategoryId, BranchId, Type, description } =
+        req.body;
     const imagePath = req.file ? `${req.file.filename}` : null;
 
     db.query(
-        'INSERT INTO Products (ProductName, Price, ImagePath, CategoryId, BranchId, Type) VALUES (?, ?, ?, ?, ?, ?)',
-        [ProductName, Price, imagePath, CategoryId, BranchId, Type],
+        'INSERT INTO Products (ProductName, Price, ImagePath, CategoryId, BranchId, Type, description) VALUES (?, ?, ?, ?, ?, ?,?)',
+        [
+            ProductName,
+            Price,
+            imagePath,
+            CategoryId,
+            BranchId,
+            Type,
+            description,
+        ],
         (err, result) => {
             if (err) return res.status(500).send(err);
             res.status(201).json({ id: result.insertId, imagePath });
@@ -92,7 +120,8 @@ router.post('/', upload.single('ImageFile'), (req, res) => {
 
 // PUT update product
 router.put('/:id', upload.single('ImageFile'), (req, res) => {
-    const { ProductName, Price, CategoryId, BranchId, Type } = req.body;
+    const { ProductName, Price, CategoryId, BranchId, Type, description } =
+        req.body;
     const productId = req.params.id;
 
     // Step 1: Fetch current image path from DB
@@ -137,7 +166,7 @@ router.put('/:id', upload.single('ImageFile'), (req, res) => {
 
         const updateQuery = `
             UPDATE Products
-            SET ProductName=?, Price=?, ImagePath=?, CategoryId=?, BranchId=?, Type=?
+            SET ProductName=?, Price=?, ImagePath=?, CategoryId=?, BranchId=?, Type=?, description=?
             WHERE ProductId=?
         `;
         db.query(
@@ -149,6 +178,7 @@ router.put('/:id', upload.single('ImageFile'), (req, res) => {
                 CategoryId,
                 BranchId,
                 Type,
+                description,
                 productId,
             ],
             (err) => {

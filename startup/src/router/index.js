@@ -8,6 +8,7 @@ import Products from '@/screens/Products.vue';
 import Flowers from '@/screens/Flowers.vue';
 import Favorites from '@/screens/Favorites.vue';
 import Sets from '@/screens/Sets.vue';
+import ProductDetail from '@/screens/ProductDetail.vue';
 
 import Users from '@/screens/Admin/Users/Users.vue';
 import Dashboard from '@/screens/Admin/Dashboard/Dashboard.vue';
@@ -67,6 +68,12 @@ export default new Router({
             name: 'Sets',
             component: Sets,
             meta: { breadcrumb: 'Sets' },
+        },
+        {
+            path: '/ProductDetail',
+            name: 'ProductDetail',
+            component: ProductDetail,
+            meta: { breadcrumb: 'ProductDetail' },
         },
 
         {

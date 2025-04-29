@@ -1,5 +1,5 @@
 <template>
-    <div class="bottle-item">
+    <div class="bottle-item" @click="navToDetails">
         <div class="image-container">
             <!-- <img
                 :src="require('@/assets/images/wine.png')"
@@ -64,6 +64,15 @@ export default {
         this.isFavorite = favorites.includes(this.product.ProductId);
     },
     methods: {
+        navToDetails() {
+            if (this.$route.query.id !== String(this.product.ProductId)) {
+                this.$router.push({
+                    name: 'ProductDetail',
+                    query: { id: this.product.ProductId },
+                });
+            }
+        },
+
         toggleFavorite() {
             let favorites = JSON.parse(
                 localStorage.getItem('favorites') || '[]'
