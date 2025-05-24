@@ -9,6 +9,7 @@ import Flowers from '@/screens/Flowers.vue';
 import Favorites from '@/screens/Favorites.vue';
 import Sets from '@/screens/Sets.vue';
 import ProductDetail from '@/screens/ProductDetail.vue';
+import Confirmation from '@/screens/Confirmation.vue';
 
 import Users from '@/screens/Admin/Users/Users.vue';
 import Dashboard from '@/screens/Admin/Dashboard/Dashboard.vue';
@@ -38,6 +39,13 @@ export default new Router({
             name: 'Cart',
             component: Cart,
             meta: { breadcrumb: 'Сагс' },
+        },
+        {
+            path: '/Confirmation',
+            name: 'Confirmation',
+            component: Confirmation,
+            meta: { breadcrumb: 'Confirmation' },
+            props: true,
         },
         {
             path: '/login',

@@ -63,7 +63,7 @@
                                 <div class="product-quantity">
                                     <button
                                         style="background-color: transparent"
-                                        @click="decreaseQuantity(index)">
+                                        @click.stop="decreaseQuantity(index)">
                                         −
                                     </button>
                                     <input
@@ -72,7 +72,7 @@
                                         readonly />
                                     <button
                                         style="background-color: transparent"
-                                        @click="increaseQuantity(index)">
+                                        @click.stop="increaseQuantity(index)">
                                         +
                                     </button>
                                 </div>
@@ -82,7 +82,7 @@
                                 <div>
                                     <button
                                         class="remove-btn"
-                                        @click="removeItem(index)">
+                                        @click.stop="removeItem(index)">
                                         ✕
                                     </button>
                                 </div>
@@ -575,9 +575,45 @@ export default {
         },
     },
     methods: {
-        confirm() {
+        async confirm() {
             if (this.validate(2)) {
                 console.log('confirming');
+                console.log(this.selectedCartItems);
+                console.log(this.cartItems);
+                console.log(this.selectedBankId);
+                let products = [];
+                this.cartItems.forEach((cart) => {
+                    this.selectedCartItems.forEach((sel) => {
+                        if (cart.ProductId == sel) {
+                            products.push({
+                                productId: sel,
+                                Quantity: cart.quantity,
+                            });
+                        }
+                    });
+                });
+                let order = {
+                    UserId: 1,
+                    PaymentType: this.selectedBankId,
+                    LocationId: this.selectedLocation.LocationId,
+                    products: products,
+                };
+                console.log(order);
+                localStorage.setItem('pendingOrder', JSON.stringify(order));
+                this.$router.push({ name: 'Confirmation' });
+                // this.$router.push({
+                //     name: 'Confirmation',
+                //     params: {
+                //         order: JSON.stringify(order),
+                //     },
+                // });
+
+                // try {
+                //     await api.createOrder(order);
+
+                // } catch (error) {
+                //     console.log('alda shude ho ');
+                // }
             } else {
                 console.log('error');
             }
@@ -628,8 +664,14 @@ export default {
         },
 
         increaseQuantity(index) {
-            this.cartItems[index].quantity++;
-            this.updateLocalStorage();
+            console.log(this.cartItems[index]);
+            if (
+                this.cartItems[index].maxQuantity >=
+                this.cartItems[index].quantity + 1
+            ) {
+                this.cartItems[index].quantity++;
+                this.updateLocalStorage();
+            }
         },
 
         // Decrease quantity
@@ -815,7 +857,10 @@ export default {
                 }
             }
             if (op == 2) {
-                if (this.cartItems.length == 0) {
+                if (
+                    this.cartItems.length == 0 ||
+                    this.selectedCartItems.length == 0
+                ) {
                     err = false;
                 } else {
                     const fname = this.customerInfo.f_name.trim();

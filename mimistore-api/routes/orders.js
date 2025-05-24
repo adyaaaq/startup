@@ -41,14 +41,36 @@ router.get('/user/:userId', (req, res) => {
 
 // Create new order
 router.post('/', (req, res) => {
-    const { ProductId, UserId, PaymentType, LocationId } = req.body;
+    const { UserId, PaymentType, LocationId, products } = req.body;
+    console.log('creatin new order');
+    if (!Array.isArray(products) || products.length === 0) {
+        return res.status(400).send('Products array is required');
+    }
 
     db.query(
-        `INSERT INTO Orders (ProductId, UserId, PaymentType, LocationId) VALUES (?, ?, ?, ?)`,
-        [ProductId, UserId, PaymentType, LocationId],
+        `INSERT INTO Orders (UserId, PaymentType, LocationId) VALUES (?, ?, ?)`,
+        [UserId, PaymentType, LocationId],
         (err, result) => {
             if (err) return res.status(500).send(err);
-            res.status(201).json({ OrderId: result.insertId });
+
+            const orderId = result.insertId;
+
+            // Prepare values for bulk insert
+            const orderItems = products.map((p) => [
+                orderId,
+                p.productId,
+                p.Quantity,
+            ]);
+
+            db.query(
+                `INSERT INTO OrderItems (OrderID, ProductID, Quantity) VALUES ?`,
+                [orderItems],
+                (err2) => {
+                    if (err2) return res.status(500).send(err2);
+
+                    res.status(201).json({ OrderId: orderId });
+                }
+            );
         }
     );
 });

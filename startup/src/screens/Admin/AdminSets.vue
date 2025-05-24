@@ -35,6 +35,11 @@
                     alt="Product Image"
                     style="height: 50px; border-radius: 4px" /> -->
             </template>
+            <template #cell(description)="data">
+                <div
+                    class="quill-content text-wrap w-100"
+                    v-html="data.item.description"></div>
+            </template>
 
             <!-- Action buttons -->
             <template #cell(actions)="row">
@@ -72,6 +77,12 @@
                         required />
                 </b-form-group>
 
+                <b-form-group label="Quantity">
+                    <b-form-input
+                        v-model.number="form.quantity"
+                        type="number"
+                        required />
+                </b-form-group>
                 <b-form-group label="Category">
                     <b-form-select
                         v-model="form.CategoryId"
@@ -94,6 +105,12 @@
                         class="form-select" />
                 </b-form-group>
 
+                <b-form-group label="Description">
+                    <quill-editor
+                        class="mt-3 mb-3"
+                        v-model="form.description"
+                        :options="editorOptions"></quill-editor>
+                </b-form-group>
                 <b-form-group label="Product Image">
                     <div class="d-flex align-items-center flex-column gap-4">
                         <div class="d-flex flex-column">
@@ -153,6 +170,8 @@ export default {
                 { key: 'ProductId', label: '#' },
                 { key: 'ProductName', label: 'Name' },
                 { key: 'Price', label: 'Price' },
+                { key: 'quantity', label: 'Quantity' },
+                { key: 'description', label: 'Description' },
                 { key: 'CategoryName', label: 'CategoryName' },
                 { key: 'BranchName', label: 'Branch' },
                 { key: 'ImagePath', label: 'Image' }, // 👈 added this
@@ -166,6 +185,8 @@ export default {
                 BranchId: null,
                 ImagePath: '',
 
+                quantity: 0,
+                description: '',
                 ImageFile: null, // For sending to server
                 type: 2,
             },
@@ -238,6 +259,8 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
+                formData.append('description', this.form.description);
+                formData.append('quantity', this.form.quantity);
                 formData.append('Type', 3);
                 if (this.form.ImageFile) {
                     formData.append(
@@ -259,6 +282,8 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
+                formData.append('description', this.form.description);
+                formData.append('quantity', this.form.quantity);
                 formData.append('Type', 3);
                 formData.append('ImageFile', this.form.ImageFile); // 🔥 match .single('ImageFile')
 

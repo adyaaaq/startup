@@ -2,48 +2,86 @@
     <div class="product-detail-container">
         <!-- Product Main Info -->
         <div class="product-main">
-            <div style="background-color: white">
+            <div style="background-color: white; width: 60%">
                 <img
                     :src="product.ImageUrl"
                     class="product-image"
                     alt="Product Image" />
             </div>
             <div class="product-info">
-                <div class="d-flex flex-row justify-content-between">
-                    <h2>{{ product.ProductName }}</h2>
-                    <button
-                        class="add-button"
-                        @mouseover="hover = true"
-                        @mouseleave="hover = false"
-                        @click="toggleFavorite">
-                        <img
-                            :src="
-                                isFavorite || hover
-                                    ? require('@/assets/svgicons/heart.svg')
-                                    : require('@/assets/svgicons/love.svg')
-                            "
-                            alt="Heart Icon"
-                            class="addicon"
-                            :class="{ 'animate-fav': favAnimating }" />
-                    </button>
-                </div>
                 <div class="d-flex flex-column gap-3">
-                    <span style="font-weight: 600"> Дэлгэрэнгүй мэдээлэл:</span>
+                    <div class="d-flex flex-row justify-content-between">
+                        <h2>{{ product.ProductName }}</h2>
+                        <button
+                            class="add-button"
+                            @mouseover="hover = true"
+                            @mouseleave="hover = false"
+                            @click="toggleFavorite">
+                            <img
+                                :src="
+                                    isFavorite || hover
+                                        ? require('@/assets/svgicons/heart.svg')
+                                        : require('@/assets/svgicons/love.svg')
+                                "
+                                alt="Heart Icon"
+                                class="addicon"
+                                :class="{ 'animate-fav': favAnimating }" />
+                        </button>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <span style="font-weight: 600"> Үнэ:</span>
 
-                    <div
-                        class="quill-content text-wrap w-100"
-                        v-html="product.description"></div>
-                </div>
-                <div class="d-flex flex-column gap-3">
-                    <span style="font-weight: 600"> Үнэ:</span>
+                        <p class="price">{{ product.Price }} ₮</p>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                        <span style="font-weight: 600">
+                            Дэлгэрэнгүй мэдээлэл:</span
+                        >
+                        <div
+                            class="quill-content text-wrap w-100"
+                            v-html="product.description"></div>
+                    </div>
 
-                    <p class="price">{{ product.Price }} ₮</p>
-                </div>
+                    <div class="d-flex flex-row gap-3 align-items-center">
+                        <div class="d-flex flex-row">
+                            <div
+                                class="d-flex align-items-center"
+                                style="
+                                    background-color: #eee;
+                                    padding: 5px 10px;
+                                    border-top-left-radius: 8px;
+                                    border-bottom-left-radius: 8px;
+                                ">
+                                <span style="font-weight: 600; font-size: 14px"
+                                    >тоо ширхэг</span
+                                >
+                            </div>
+                            <b-form-select
+                                v-model="quantity"
+                                :options="quantiteis"
+                                required
+                                text-field="Quantity"
+                                value-field="Quantity"
+                                placeholder="тоо ширхэг"
+                                class="form-select"
+                                style="
+                                    width: 70px;
+                                    border-top-left-radius: 0px;
+                                    border-bottom-left-radius: 0px;
+                                " />
+                        </div>
+                        <div>
+                            <p>
+                                {{ this.product.quantity }} ширхэг бэлэн байна.
+                            </p>
+                        </div>
+                    </div>
 
-                <div class="quantity-control">
-                    <button @click="decreaseQuantity">−</button>
-                    <input type="text" :value="quantity" readonly />
-                    <button @click="increaseQuantity">+</button>
+                    <!-- <div class="quantity-control">
+                        <button @click="decreaseQuantity">−</button>
+                        <input type="text" :value="product.quantity" readonly />
+                        <button @click="increaseQuantity">+</button>
+                    </div> -->
                 </div>
                 <div class="d-flex flex-row gap-2">
                     <button class="add-to-cart-btn" @click="addToCart">
@@ -80,7 +118,8 @@ export default {
         return {
             product: {}, // product details
             quantity: 1,
-            suggestedProducts: [], // similar or suggested products
+            suggestedProducts: [],
+            quantiteis: [],
             favAnimating: false, // ⭐ used to trigger animation
             hover: false,
             isFavorite: false,
@@ -93,8 +132,10 @@ export default {
         async fetchProduct() {
             const id = this.$route.query.id; // assuming your route is /product/:id
             const res = await api.getProduct(id);
-            console.log('i got one prod', res, id);
             this.product = res;
+            for (var i = 0; i < this.product.quantity; i++) {
+                this.quantiteis.push(i + 1);
+            }
         },
         async fetchSuggestedProducts() {
             const res = await api.getProducts(this.product.Type);
@@ -103,10 +144,10 @@ export default {
             );
         },
         increaseQuantity() {
-            this.quantity++;
+            this.product.quantity++;
         },
         decreaseQuantity() {
-            if (this.quantity > 1) this.quantity--;
+            if (this.product.quantity > 1) this.product.quantity--;
         },
         addToCart() {
             const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -133,7 +174,8 @@ export default {
 
 <style scoped>
 .product-detail-container {
-    padding: 20px;
+    margin-left: 40px;
+    margin-right: 40px;
 }
 
 .product-main {
@@ -143,7 +185,7 @@ export default {
 }
 
 .product-image {
-    width: 60%;
+    width: 100%;
     padding: 20px;
     object-fit: cover;
     border-radius: 12px;
@@ -155,6 +197,7 @@ export default {
     padding: 20px;
     flex: 1;
     display: flex;
+    justify-content: space-between;
     flex-direction: column;
     gap: 12px;
 }
@@ -187,6 +230,7 @@ export default {
 }
 
 .add-to-cart-btn {
+    width: 100%;
     margin-top: 10px;
     background-color: #007bff;
     color: white;

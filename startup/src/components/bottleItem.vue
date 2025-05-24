@@ -1,11 +1,12 @@
 <template>
-    <div class="bottle-item" @click="navToDetails">
+    <div class="bottle-item">
         <div class="image-container">
             <!-- <img
                 :src="require('@/assets/images/wine.png')"
                 alt="Bottle Image"
                 class="bottle-image" /> -->
             <img
+                @click="navToDetails"
                 :src="product.ImageUrl"
                 alt="Bottle Image"
                 class="bottle-image" />
@@ -26,7 +27,9 @@
             </button>
         </div>
         <div class="bottle-info">
-            <p class="bottle-name">{{ product.ProductName }}</p>
+            <p @click="navToDetails" class="bottle-name">
+                {{ product.ProductName }}
+            </p>
             <div
                 class="d-flex flex-row justify-content-between align-items-center">
                 <div class="price-section">
@@ -103,23 +106,30 @@ export default {
         addToCart() {
             let cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
 
-            // Check if item already exists in cart
             const existingItem = cartItems.find(
                 (item) => item.ProductId === this.product.ProductId
             );
 
             if (existingItem) {
-                // If item exists, increase quantity
-                existingItem.quantity += 1;
+                if (existingItem.quantity < existingItem.maxQuantity) {
+                    existingItem.quantity += 1;
+                } else {
+                    console.warn('Maximum stock reached.');
+                }
             } else {
-                // Add new item with quantity 1
-                cartItems.push({ ...this.product, quantity: 1 });
+                if (this.product.quantity > 0) {
+                    cartItems.push({
+                        ...this.product,
+                        quantity: 1,
+                        maxQuantity: this.product.quantity, // ✅ append this
+                    });
+                } else {
+                    console.warn('Out of stock.');
+                }
             }
 
-            // Save updated cart to localStorage
             localStorage.setItem('cart', JSON.stringify(cartItems));
 
-            // Emit event to update cart in Navbar
             EventBus.$emit('cart-updated', cartItems);
 
             this.cartAnimating = true;

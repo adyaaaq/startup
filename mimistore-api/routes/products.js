@@ -96,12 +96,19 @@ const upload = multer({ storage });
 
 // POST new product
 router.post('/', upload.single('ImageFile'), (req, res) => {
-    const { ProductName, Price, CategoryId, BranchId, Type, description } =
-        req.body;
+    const {
+        ProductName,
+        Price,
+        CategoryId,
+        BranchId,
+        Type,
+        description,
+        quantity,
+    } = req.body;
     const imagePath = req.file ? `${req.file.filename}` : null;
 
     db.query(
-        'INSERT INTO Products (ProductName, Price, ImagePath, CategoryId, BranchId, Type, description) VALUES (?, ?, ?, ?, ?, ?,?)',
+        'INSERT INTO Products (ProductName, Price, ImagePath, CategoryId, BranchId, Type, description, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         [
             ProductName,
             Price,
@@ -110,6 +117,7 @@ router.post('/', upload.single('ImageFile'), (req, res) => {
             BranchId,
             Type,
             description,
+            quantity,
         ],
         (err, result) => {
             if (err) return res.status(500).send(err);
@@ -120,8 +128,15 @@ router.post('/', upload.single('ImageFile'), (req, res) => {
 
 // PUT update product
 router.put('/:id', upload.single('ImageFile'), (req, res) => {
-    const { ProductName, Price, CategoryId, BranchId, Type, description } =
-        req.body;
+    const {
+        ProductName,
+        Price,
+        CategoryId,
+        BranchId,
+        Type,
+        description,
+        quantity,
+    } = req.body;
     const productId = req.params.id;
 
     // Step 1: Fetch current image path from DB
@@ -166,9 +181,10 @@ router.put('/:id', upload.single('ImageFile'), (req, res) => {
 
         const updateQuery = `
             UPDATE Products
-            SET ProductName=?, Price=?, ImagePath=?, CategoryId=?, BranchId=?, Type=?, description=?
+            SET ProductName=?, Price=?, ImagePath=?, CategoryId=?, BranchId=?, Type=?, description=?, quantity=?
             WHERE ProductId=?
         `;
+        console.log('qu', quantity);
         db.query(
             updateQuery,
             [
@@ -179,6 +195,7 @@ router.put('/:id', upload.single('ImageFile'), (req, res) => {
                 BranchId,
                 Type,
                 description,
+                quantity,
                 productId,
             ],
             (err) => {

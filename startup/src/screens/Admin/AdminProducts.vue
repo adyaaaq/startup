@@ -73,6 +73,12 @@
                         required />
                 </b-form-group>
 
+                <b-form-group label="Quantity">
+                    <b-form-input
+                        v-model.number="form.quantity"
+                        type="number"
+                        required />
+                </b-form-group>
                 <b-form-group label="Category">
                     <b-form-select
                         v-model="form.CategoryId"
@@ -161,6 +167,7 @@ export default {
                 { key: 'ProductId', label: '#' },
                 { key: 'ProductName', label: 'Name' },
                 { key: 'Price', label: 'Price' },
+                { key: 'quantity', label: 'Quantity' },
                 { key: 'description', label: 'Description' },
                 { key: 'CategoryName', label: 'CategoryName' },
                 { key: 'BranchName', label: 'Branch' },
@@ -174,7 +181,8 @@ export default {
                 CategoryId: null,
                 BranchId: null,
                 ImagePath: '',
-                description: 'test',
+                quantity: 0,
+                description: '',
                 ImageFile: null, // For sending to server
             },
 
@@ -254,6 +262,7 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
+                formData.append('quantity', this.form.quantity);
                 formData.append('Type', 1);
                 formData.append('description', this.form.description);
                 if (this.form.ImageFile) {
@@ -276,6 +285,7 @@ export default {
                 formData.append('Price', this.form.Price);
                 formData.append('CategoryId', this.form.CategoryId);
                 formData.append('BranchId', this.form.BranchId);
+                formData.append('quantity', this.form.quantity);
                 formData.append('Type', 1);
                 formData.append('description', this.form.description);
                 formData.append('ImageFile', this.form.ImageFile); // 🔥 match .single('ImageFile')
