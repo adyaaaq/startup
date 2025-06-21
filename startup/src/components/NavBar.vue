@@ -53,14 +53,20 @@
                         >
                     </div>
                 </router-link>
-
-                <router-link :to="{ name: 'Login' }" class="cart-link">
+                <a @click="handleUserNav" class="cart-link">
+                    <img
+                        class="svgicon"
+                        style="height: 16px; width: 16px"
+                        src="@/assets/svgicons/user.svg"
+                        alt="User Icon" />
+                </a>
+                <!-- <router-link :to="{ name: 'Login' }" class="cart-link">
                     <img
                         class="svgicon"
                         style="height: 16px; width: 16px"
                         src="@/assets/svgicons/user.svg"
                         alt="Favorites Icon" />
-                </router-link>
+                </router-link> -->
             </div>
         </div>
     </nav>
@@ -68,7 +74,7 @@
 
 <script>
 import { EventBus } from '@/Utils/eventBus';
-
+import { getData } from '@/Utils/LocalStorage';
 export default {
     name: 'AppNavbar',
     data() {
@@ -76,6 +82,7 @@ export default {
             cartItems: [],
         };
     },
+
     computed: {
         // Calculate distinct item count
         distinctItemCount() {
@@ -98,6 +105,20 @@ export default {
         });
     },
     methods: {
+        handleUserNav() {
+            if (this.$route.name !== 'AccountInfo') {
+                const userData = getData('userData');
+                if (userData) {
+                    this.$router.push({
+                        name: 'account',
+                    });
+                } else {
+                    this.$router.push({
+                        name: 'Login',
+                    });
+                }
+            }
+        },
         loadCartItems() {
             const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
             this.cartItems = storedCart;

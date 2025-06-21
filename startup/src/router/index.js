@@ -42,6 +42,8 @@ export default new Router({
 
         {
             path: '/account',
+            name: 'account',
+            redirect: '/account/info',
             component: AccountLayout,
             children: [
                 {

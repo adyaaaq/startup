@@ -18,3 +18,6 @@ app.use('/api/branches', require('./routes/branch'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`API running on port ${PORT}`));
+
+const { swaggerUi, swaggerDocs } = require('./swagger'); // ← өмнөх алхамд үүсгэсэн
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));

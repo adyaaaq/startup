@@ -993,4 +993,9 @@ label {
 input::placeholder {
     font-family: var(--text-font);
 }
+
+.Vue-Toastification__toast-body {
+    font-family: var(--text-font) !important;
+    font-size: 14px;
+}
 </style>

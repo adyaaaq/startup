@@ -249,6 +249,7 @@
 <script>
 import alertModal from '@/components/alertModal.vue';
 import api from '@/services/api';
+import { setData } from '@/Utils/LocalStorage';
 export default {
     name: 'LoginPage',
     components: {
@@ -315,8 +316,18 @@ export default {
                     try {
                         let result = await api.loginUser(data);
                         console.log(result);
+                        await setData('userData', result);
+                        // let dataTest = getData('userData');
+                        // console.log('datates : ', dataTest);
+                        this.$toast.success('Амжилттай нэвтэрлээ.');
                     } catch (error) {
-                        console.log('Aldaa : ', error);
+                        // console.log(
+                        //     'Aldaa:',
+                        //     error.response?.data?.message || error.message
+                        // );
+                        this.$toast.error(
+                            error.response?.data?.message || 'Алдаа гарлаа'
+                        );
                     }
                 }
             }

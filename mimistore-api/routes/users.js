@@ -2,7 +2,24 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcryptjs');
-// GET all users
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: Хэрэглэгчтэй холбоотой API-ууд
+ */
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Бүх хэрэглэгчийг авах
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Амжилттай
+ */
 router.get('/', (req, res) => {
     db.query(
         'SELECT UserId, Username, FirstName, LastName, PhoneNumber, Role FROM Users',
@@ -13,7 +30,25 @@ router.get('/', (req, res) => {
     );
 });
 
-// GET single user
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Нэг хэрэглэгч авах
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Хэрэглэгчийн ID
+ *     responses:
+ *       200:
+ *         description: Амжилттай
+ *       500:
+ *         description: Алдаа гарлаа
+ */
 router.get('/:id', (req, res) => {
     db.query(
         'SELECT UserId, Username, FirstName, LastName, PhoneNumber, Role FROM Users WHERE UserId = ?',
@@ -25,7 +60,46 @@ router.get('/:id', (req, res) => {
     );
 });
 
-// CREATE new user (register)
+/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Шинэ хэрэглэгч бүртгэх
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - Email
+ *               - Password
+ *             properties:
+ *               Email:
+ *                 type: string
+ *               Password:
+ *                 type: string
+ *               FirstName:
+ *                 type: string
+ *               LastName:
+ *                 type: string
+ *               PhoneNumber:
+ *                 type: string
+ *               Role:
+ *                 type: string
+ *               BranchId:
+ *                 type: integer
+ *               Genter:
+ *                 type: integer
+ *               BirthDay:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Амжилттай бүртгэгдлээ
+ *       400:
+ *         description: Email эсвэл Утас бүртгэлтэй байна
+ */
 router.post('/', async (req, res) => {
     const {
         Email,
@@ -40,7 +114,6 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     try {
-        // Check for existing email or phone
         db.query(
             `SELECT * FROM Users WHERE Email = ? OR PhoneNumber = ?`,
             [Email, PhoneNumber],
@@ -62,7 +135,6 @@ router.post('/', async (req, res) => {
                 }
 
                 const hashed = await bcrypt.hash(Password, 10);
-
                 db.query(
                     `INSERT INTO Users 
                     (Email, Password, FirstName, LastName, PhoneNumber, Role, BranchId, Genter, BirthDay) 
@@ -86,17 +158,41 @@ router.post('/', async (req, res) => {
             }
         );
     } catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
 
-// LOGIN (basic)
+/**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: Нэвтрэх (Email эсвэл Утас + Нууц үг)
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Username:
+ *                 type: string
+ *                 example: test@a.com
+ *               Password:
+ *                 type: string
+ *                 example: yourpassword
+ *     responses:
+ *       200:
+ *         description: Амжилттай нэвтэрлээ
+ *       401:
+ *         description: Нууц үг буруу
+ *       404:
+ *         description: Хэрэглэгч олдсонгүй
+ */
 router.post('/login', (req, res) => {
     const { Username, Password } = req.body;
 
-    // Email эсвэл PhoneNumber аль нэг байж болно
-    console.log('we are loggin in');
+    console.log(Username, Password);
     db.query(
         `SELECT * FROM Users WHERE Email = ? OR PhoneNumber = ?`,
         [Username, Username],
@@ -120,15 +216,50 @@ router.post('/login', (req, res) => {
 
             res.json({
                 id: user.UserId,
-                username: user.Email || user.PhoneNumber,
+                phone: user.PhoneNumber,
                 role: user.Role,
+                gender: user.Genter,
+                dob: user.BirthDay,
+                email: user.Email,
                 message: 'Нэвтрэлт амжилттай',
             });
         }
     );
 });
 
-// UPDATE user
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   put:
+ *     summary: Хэрэглэгчийн мэдээлэл шинэчлэх
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Хэрэглэгчийн ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               FirstName:
+ *                 type: string
+ *               LastName:
+ *                 type: string
+ *               PhoneNumber:
+ *                 type: string
+ *               Role:
+ *                 type: string
+ *               BranchId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Амжилттай шинэчлэгдлээ
+ */
 router.put('/:id', (req, res) => {
     const { FirstName, LastName, PhoneNumber, Role, BranchId } = req.body;
     db.query(
@@ -141,7 +272,23 @@ router.put('/:id', (req, res) => {
     );
 });
 
-// DELETE user
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     summary: Хэрэглэгч устгах
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Хэрэглэгчийн ID
+ *     responses:
+ *       200:
+ *         description: Амжилттай устгалаа
+ */
 router.delete('/:id', (req, res) => {
     db.query('DELETE FROM Users WHERE UserId = ?', [req.params.id], (err) => {
         if (err) return res.status(500).send(err);
