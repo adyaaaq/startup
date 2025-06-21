@@ -200,6 +200,7 @@
 import AlertModal from '@/components/alertModal.vue';
 import locationItem from '@/components/locationItem.vue';
 import api from '@/services/api';
+import { getData } from '@/Utils/LocalStorage';
 export default {
     name: 'CartPage',
     components: { locationItem, AlertModal },
@@ -240,9 +241,11 @@ export default {
             title: 'Хувийн мэдээлэл засах',
             alertType: 'success',
             showAlert: false,
+            userData: null,
         };
     },
     mounted() {
+        this.userData = getData('userData');
         this.loadLocations();
     },
     methods: {
@@ -308,7 +311,7 @@ export default {
             }
         },
         async loadLocations() {
-            this.LocationItems = await api.getLocationsByUser(1);
+            this.LocationItems = await api.getLocationsByUser(this.userData.id);
         },
         toggle() {
             this.locAddFormShow = !this.locAddFormShow;
@@ -332,7 +335,7 @@ export default {
             if (this.validate(1)) {
                 if (this.op == 1) {
                     let data = {
-                        UserId: 1,
+                        UserId: this.userData.id,
                         Title: this.editedLocation.name,
                         Hot: this.editedLocation.district,
                         Duureg: this.editedLocation.district,
@@ -364,7 +367,7 @@ export default {
 
                 if (this.op == 2) {
                     let data = {
-                        UserId: 1,
+                        UserId: this.userData.id,
                         Title: this.editedLocation.name,
                         Hot: this.editedLocation.district,
                         Duureg: this.editedLocation.district,

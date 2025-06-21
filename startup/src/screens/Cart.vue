@@ -470,6 +470,7 @@ import locationItem from '@/components/locationItem.vue';
 import BankItem from '@/components/banktem.vue';
 import { EventBus } from '@/Utils/eventBus';
 import api from '@/services/api';
+import { getData } from '@/Utils/LocalStorage';
 
 export default {
     name: 'CartPage',
@@ -554,9 +555,11 @@ export default {
                     image: require('@/assets/banks/mbank.png'),
                 },
             ],
+            userData: null,
         };
     },
     async mounted() {
+        this.userData = await getData('userData');
         this.loadCartItems();
         this.loadLocations();
     },
@@ -749,7 +752,7 @@ export default {
             if (this.validate(1)) {
                 if (this.op == 1) {
                     let data = {
-                        UserId: 1,
+                        UserId: this.userData.id,
                         Title: this.editedLocation.name,
                         Hot: this.editedLocation.district,
                         Duureg: this.editedLocation.district,
@@ -774,7 +777,7 @@ export default {
 
                 if (this.op == 2) {
                     let data = {
-                        UserId: 1,
+                        UserId: this.userData.id,
                         Title: this.editedLocation.name,
                         Hot: this.editedLocation.district,
                         Duureg: this.editedLocation.district,
@@ -889,7 +892,7 @@ export default {
             return err;
         },
         async loadLocations() {
-            this.LocationItems = await api.getLocationsByUser(1);
+            this.LocationItems = await api.getLocationsByUser(this.userData.id);
         },
         loadCartItems() {
             const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
