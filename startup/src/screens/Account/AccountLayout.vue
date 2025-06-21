@@ -17,15 +17,18 @@
 </template>
 
 <script>
+import { clearData } from '@/Utils/LocalStorage';
+import { EventBus } from '@/Utils/eventBus';
 export default {
     name: 'AccountLayout',
     methods: {
         logout() {
-            // replace with actual logout logic
-            alert('Гарав');
+            clearData('userData');
+            EventBus.$emit('user-updated', null);
             this.$router.push('/login');
         },
     },
+    mounted() {},
 };
 </script>
 

@@ -34,8 +34,8 @@
                 </router-link>
 
                 <!-- Cart -->
-                <router-link
-                    :to="{ name: 'Cart' }"
+                <a
+                    @click="navigateToCart"
                     class="cart-link no-bg"
                     style="padding-right: 0px">
                     <div class="cart">
@@ -52,13 +52,18 @@
                             >{{ totalPrice.toLocaleString() }}₮</span
                         >
                     </div>
-                </router-link>
-                <a @click="handleUserNav" class="cart-link">
+                </a>
+                <a
+                    @click="handleUserNav"
+                    class="cart-link gap-2 align-items-center">
                     <img
                         class="svgicon"
                         style="height: 16px; width: 16px"
                         src="@/assets/svgicons/user.svg"
                         alt="User Icon" />
+
+                    <p v-if="userData">{{ userData.fname }}</p>
+                    <p v-else>Нэвтрэх</p>
                 </a>
                 <!-- <router-link :to="{ name: 'Login' }" class="cart-link">
                     <img
@@ -80,6 +85,7 @@ export default {
     data() {
         return {
             cartItems: [],
+            userData: null,
         };
     },
 
@@ -103,16 +109,50 @@ export default {
         EventBus.$on('cart-updated', (cartItems) => {
             this.cartItems = cartItems; // Update cartItems
         });
+
+        const stored = getData('userData');
+        if (stored) {
+            this.userData = stored;
+            // Optionally re-emit to re-sync all components
+            EventBus.$emit('user-updated', stored);
+        }
+
+        // ✅ Watch for changes through EventBus
+        EventBus.$on('user-updated', (data) => {
+            this.userData = data;
+        });
+    },
+
+    beforeDestroy() {
+        EventBus.$off('user-updated');
     },
     methods: {
+        navigateToCart() {
+            const userData = getData('userData');
+            if (userData) {
+                if (this.$route.name !== 'Cart') {
+                    this.$router.push({
+                        name: 'Cart',
+                    });
+                }
+            } else {
+                if (this.$route.name !== 'Login') {
+                    this.$router.push({
+                        name: 'Login',
+                    });
+                }
+            }
+        },
         handleUserNav() {
-            if (this.$route.name !== 'AccountInfo') {
-                const userData = getData('userData');
-                if (userData) {
+            const userData = getData('userData');
+            if (userData) {
+                if (this.$route.name !== 'AccountInfo') {
                     this.$router.push({
                         name: 'account',
                     });
-                } else {
+                }
+            } else {
+                if (this.$route.name !== 'Login') {
                     this.$router.push({
                         name: 'Login',
                     });
@@ -194,6 +234,7 @@ export default {
     transition: background-color 0.2s ease;
     text-decoration: none;
     color: inherit;
+    cursor: pointer;
 }
 
 .cart-link:hover:not(.no-bg),

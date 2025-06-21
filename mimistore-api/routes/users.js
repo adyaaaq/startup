@@ -51,11 +51,37 @@ router.get('/', (req, res) => {
  */
 router.get('/:id', (req, res) => {
     db.query(
-        'SELECT UserId, Username, FirstName, LastName, PhoneNumber, Role FROM Users WHERE UserId = ?',
+        `SELECT 
+            UserId, 
+            PhoneNumber, 
+            Role, 
+            Genter, 
+            BirthDay, 
+            Email, 
+            FirstName, 
+            LastName 
+        FROM Users 
+        WHERE UserId = ?`,
         [req.params.id],
-        (err, result) => {
+        (err, results) => {
             if (err) return res.status(500).send(err);
-            res.json(result[0]);
+            if (results.length === 0)
+                return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
+
+            const user = results[0];
+
+            // 👇 Та хүссэн форматтайгаар буцааж байна
+            res.json({
+                id: user.UserId,
+                phone: user.PhoneNumber,
+                role: user.Role,
+                gender: user.Genter,
+                dob: user.BirthDay,
+                email: user.Email,
+                fname: user.FirstName,
+                lname: user.LastName,
+                message: 'амжилттай',
+            });
         }
     );
 });
@@ -221,6 +247,8 @@ router.post('/login', (req, res) => {
                 gender: user.Genter,
                 dob: user.BirthDay,
                 email: user.Email,
+                fname: user.FirstName,
+                lname: user.LastName,
                 message: 'Нэвтрэлт амжилттай',
             });
         }
@@ -260,14 +288,92 @@ router.post('/login', (req, res) => {
  *       200:
  *         description: Амжилттай шинэчлэгдлээ
  */
-router.put('/:id', (req, res) => {
-    const { FirstName, LastName, PhoneNumber, Role, BranchId } = req.body;
+
+router.put('/:id', async (req, res) => {
+    const {
+        FirstName,
+        LastName,
+        PhoneNumber,
+        Role,
+        BranchId,
+        Email,
+        Genter,
+        BirthDay,
+        currentPassword, // 🛑 хуучин нууц үг
+        newPassword, // 🆕 шинэ нууц үг
+    } = req.body;
+    console.log(' --------- UPDATEING --------- ');
+    console.log('FirstName ', FirstName);
+    console.log('LastName ', LastName);
+    console.log('PhoneNumber ', PhoneNumber);
+    console.log('Role ', Role);
+    console.log('BranchId ', BranchId);
+    console.log('Email ', Email);
+    console.log('Genter ', Genter);
+    console.log('BirthDay ', BirthDay);
+    console.log('currentPassword ', currentPassword);
+    console.log('newPassword ', newPassword);
+
     db.query(
-        'UPDATE Users SET FirstName=?, LastName=?, PhoneNumber=?, Role=?, BranchId=? WHERE UserId=?',
-        [FirstName, LastName, PhoneNumber, Role, BranchId, req.params.id],
-        (err) => {
+        'SELECT * FROM Users WHERE UserId = ?',
+        [req.params.id],
+        async (err, results) => {
             if (err) return res.status(500).send(err);
-            res.json({ success: true });
+            if (results.length === 0) {
+                return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
+            }
+
+            const oldUser = results[0];
+
+            let finalPassword = oldUser.Password;
+
+            if (currentPassword && newPassword) {
+                const isMatch = await bcrypt.compare(
+                    currentPassword,
+                    oldUser.Password
+                );
+                if (!isMatch) {
+                    return res
+                        .status(400)
+                        .json({ message: 'Хуучин нууц үг буруу байна' });
+                }
+
+                // Хэрвээ зөв байвал шинэ нууц үгийг хэшлэнэ
+                finalPassword = await bcrypt.hash(newPassword, 10);
+            }
+
+            db.query(
+                `UPDATE Users SET 
+                    FirstName = ?, 
+                    LastName = ?, 
+                    PhoneNumber = ?, 
+                    Role = ?, 
+                    BranchId = ?, 
+                    Email = ?, 
+                    Genter = ?, 
+                    BirthDay = ?, 
+                    Password = ?
+                 WHERE UserId = ?`,
+                [
+                    FirstName ?? oldUser.FirstName,
+                    LastName ?? oldUser.LastName,
+                    PhoneNumber ?? oldUser.PhoneNumber,
+                    Role ?? oldUser.Role,
+                    BranchId ?? oldUser.BranchId,
+                    Email ?? oldUser.Email,
+                    Genter ?? oldUser.Genter,
+                    BirthDay ?? oldUser.BirthDay,
+                    finalPassword,
+                    req.params.id,
+                ],
+                (err2) => {
+                    if (err2) return res.status(500).send(err2);
+                    res.json({
+                        success: true,
+                        message: 'Мэдээлэл амжилттай шинэчлэгдлээ',
+                    });
+                }
+            );
         }
     );
 });

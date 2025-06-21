@@ -250,6 +250,8 @@
 import alertModal from '@/components/alertModal.vue';
 import api from '@/services/api';
 import { setData } from '@/Utils/LocalStorage';
+import { EventBus } from '@/Utils/eventBus';
+
 export default {
     name: 'LoginPage',
     components: {
@@ -317,8 +319,14 @@ export default {
                         let result = await api.loginUser(data);
                         console.log(result);
                         await setData('userData', result);
+
+                        EventBus.$emit('user-updated', result);
                         // let dataTest = getData('userData');
                         // console.log('datates : ', dataTest);
+
+                        this.$router.replace({
+                            name: 'Products',
+                        });
                         this.$toast.success('Амжилттай нэвтэрлээ.');
                     } catch (error) {
                         // console.log(

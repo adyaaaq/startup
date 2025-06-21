@@ -1,44 +1,78 @@
 <template>
     <div class="password-info">
-        <!-- Current password -->
         <div class="form-group">
-            <label>Одоогийн нууц үг</label>
-            <div class="password-field">
-                <input
-                    :type="showCurrent ? 'text' : 'password'"
-                    v-model="form.currentPassword" />
-                <img
-                    @click="showCurrent = !showCurrent"
-                    src="@/assets/svgicons/show.svg"
-                    alt="toggle" />
+            <div class="password-wrapper col">
+                <label for="password">Одоогийн нууц үг</label>
+                <div class="password-input-container">
+                    <input
+                        class="form-control"
+                        :class="{
+                            'border-danger': error.current,
+                        }"
+                        :type="showCurrent ? 'text' : 'password'"
+                        v-model="form.currentPassword"
+                        id="password"
+                        @input="error.current = false" />
+                    <img
+                        @click="showCurrent = !showCurrent"
+                        :src="
+                            showCurrent
+                                ? require('@/assets/svgicons/hide.svg')
+                                : require('@/assets/svgicons/show.svg')
+                        "
+                        alt="toggle"
+                        class="toggle-icon" />
+                </div>
             </div>
         </div>
 
         <!-- New password + Confirm -->
         <div class="form-row">
-            <div class="form-group half">
-                <label>Шинэ нууц үг</label>
-                <div class="password-field">
+            <div class="password-wrapper col">
+                <label for="password">Шинэ нууц үг</label>
+                <div class="password-input-container">
                     <input
+                        class="form-control"
+                        :class="{
+                            'border-danger': error.newPass,
+                        }"
                         :type="showNew ? 'text' : 'password'"
-                        v-model="form.newPassword" />
+                        v-model="form.newPassword"
+                        id="password"
+                        @input="error.newPass = false" />
                     <img
                         @click="showNew = !showNew"
-                        src="@/assets/svgicons/show.svg"
-                        alt="toggle" />
+                        :src="
+                            showNew
+                                ? require('@/assets/svgicons/hide.svg')
+                                : require('@/assets/svgicons/show.svg')
+                        "
+                        alt="toggle"
+                        class="toggle-icon" />
                 </div>
             </div>
 
-            <div class="form-group half">
-                <label>Шинэ нууц үг баталгаажуулах</label>
-                <div class="password-field">
+            <div class="password-wrapper col">
+                <label for="password">Шинэ нууц үг баталгаажуулах</label>
+                <div class="password-input-container">
                     <input
+                        class="form-control"
+                        :class="{
+                            'border-danger': error.newPass2,
+                        }"
                         :type="showConfirm ? 'text' : 'password'"
-                        v-model="form.confirmPassword" />
+                        v-model="form.confirmPassword"
+                        id="password"
+                        @input="error.newPass2 = false" />
                     <img
                         @click="showConfirm = !showConfirm"
-                        src="@/assets/svgicons/show.svg"
-                        alt="toggle" />
+                        :src="
+                            showConfirm
+                                ? require('@/assets/svgicons/hide.svg')
+                                : require('@/assets/svgicons/show.svg')
+                        "
+                        alt="toggle"
+                        class="toggle-icon" />
                 </div>
             </div>
         </div>
@@ -46,10 +80,24 @@
         <button class="save-btn btn-primary" @click="submitPassword">
             Нууц үг солих
         </button>
+
+        <template>
+            <div>
+                <alert-modal
+                    :visible.sync="showAlert"
+                    :title="title"
+                    :message="message"
+                    :type="alertType"
+                    @close="handleClose"
+                    :hide="handleClose" />
+            </div>
+        </template>
     </div>
 </template>
 
 <script>
+import api from '@/services/api';
+import alertModal from '@/components/alertModal.vue';
 export default {
     name: 'PasswordInfo',
     data() {
@@ -62,26 +110,81 @@ export default {
             showCurrent: false,
             showNew: false,
             showConfirm: false,
+            error: {
+                current: false,
+                newPass: false,
+                newPass2: false,
+            },
+            message: '',
+            title: 'Нууц үг шинэчлэх',
+            alertType: 'success',
+            showAlert: false,
         };
     },
+
+    components: {
+        alertModal,
+    },
+    props: {
+        userData: {
+            type: Object,
+            default: () => ({}),
+        },
+        update: {
+            type: Function,
+        },
+    },
+    mounted() {
+        console.log(this.userData);
+    },
     methods: {
-        submitPassword() {
-            if (
-                !this.form.currentPassword ||
-                !this.form.newPassword ||
-                !this.form.confirmPassword
-            ) {
-                alert('Бүх талбарыг бөглөнө үү');
-                return;
+        async submitPassword() {
+            let err = false;
+            const current = this.form.currentPassword?.trim();
+            const newPass = this.form.newPassword?.trim();
+            const newPass2 = this.form.confirmPassword?.trim();
+            if (!current) {
+                err = true;
+                this.error.current = true;
+            }
+            if (!newPass) {
+                err = true;
+                this.error.newPass = true;
+            }
+            if (!newPass2) {
+                err = true;
+                this.error.newPass2 = true;
             }
 
             if (this.form.newPassword !== this.form.confirmPassword) {
-                alert('Шинэ нууц үг таарахгүй байна');
-                return;
+                err = true;
+                this.error.newPass = true;
+                this.error.newPass2 = true;
+                this.$toast.error('Нууц үг зөрж байна.');
             }
+            console.log(err);
+            if (!err) {
+                try {
+                    await api.updateUser(this.userData.id, {
+                        currentPassword: this.form.currentPassword,
+                        newPassword: this.form.newPassword,
+                    });
+                    this.message = 'Нууц үг амжилттай шинэчлэгдлээ.';
+                    this.alertType = 'success';
+                    this.showAlert = true;
+                    this.form.currentPassword = '';
+                    this.form.newPassword = '';
+                    this.form.confirmPassword = '';
+                } catch (error) {
+                    this.message = error.response.data.message;
+                    this.showAlert = true;
+                    this.alertType = 'error';
+                }
+            }
+        },
 
-            alert('Нууц үг амжилттай солигдлоо');
-            // TODO: API call here
+        handleClose() {
+            // console.log('test');
         },
     },
 };
@@ -112,7 +215,7 @@ export default {
     flex: 1;
     min-width: 280px;
 }
-
+/* 
 .password-field {
     display: flex;
     align-items: center;
@@ -120,15 +223,7 @@ export default {
     border-radius: 8px;
     overflow: hidden;
     background: #fff;
-}
-
-.password-field input {
-    flex: 1;
-    padding: 10px;
-    font-size: 14px;
-    border: none;
-    outline: none;
-}
+} */
 
 .password-field img {
     width: 18px;
@@ -152,4 +247,32 @@ export default {
     width: 100%;
     margin-top: 10px;
 }
+
+.border-danger:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.password-input-container {
+    position: relative;
+}
+
+.toggle-icon {
+    position: absolute;
+    right: 10px;
+    top: 45%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.toggle-icon:hover {
+    opacity: 1;
+}
+
+/* .password-wrapper {
+    margin-bottom: 16px;
+} */
 </style>

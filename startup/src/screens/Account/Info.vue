@@ -18,7 +18,11 @@
         </div>
 
         <div class="tab-content">
-            <component :is="tabs[activeTab].component" />
+            <component
+                v-if="isReady"
+                :is="tabs[activeTab].component"
+                :user-data="userData"
+                :update="updateUserData" />
         </div>
     </div>
 </template>
@@ -29,6 +33,8 @@ import EmailInfo from './comps/EmailInfo.vue';
 import PersonalInfo from './comps/PersonalInfo.vue';
 import PasswordInfo from './comps/PasswordInfo.vue';
 import PhoneInfo from './comps/PhoneInfo.vue';
+
+import { getData } from '@/Utils/LocalStorage';
 
 export default {
     name: 'Info',
@@ -74,7 +80,20 @@ export default {
                     component: 'AddressInfo',
                 },
             ],
+            userData: null,
+            isReady: false,
         };
+    },
+    mounted() {
+        this.userData = getData('userData');
+        this.tabs[0].subtitle = this.userData.fname;
+        console.log('user data in infoooo: ', this.userData);
+        this.isReady = true; // ✅ only allow rendering after this
+    },
+    methods: {
+        updateUserData() {
+            this.userData = getData('userData');
+        },
     },
 };
 </script>

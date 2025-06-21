@@ -12,61 +12,119 @@
         </p>
 
         <div class="phone-input-group">
-            <div
-                class="digit-box"
-                v-for="(digit, index) in phoneDigits.slice(0, 4)"
-                :key="index">
+            <div class="digit-box">
                 <input
                     class="form-control"
-                    maxlength="1"
-                    v-model="phoneDigits[index]"
-                    @input="focusNext(index, $event)" />
-            </div>
-
-            <span class="dash">-</span>
-
-            <div
-                class="digit-box"
-                v-for="(digit, index) in phoneDigits.slice(4, 8)"
-                :key="index + 4">
-                <input
-                    class="form-control"
-                    maxlength="1"
-                    v-model="phoneDigits[index + 4]"
-                    @input="focusNext(index + 4, $event)" />
+                    type="number"
+                    v-model="phone"
+                    @input="onInput"
+                    inputmode="numeric"
+                    :class="{
+                        'border-danger': error,
+                    }" />
             </div>
         </div>
 
-        <button class="submit-btn btn-primary" @click="submitPhone">
+        <button
+            class="submit-btn btn-primary"
+            :disabled="!isPhoneChanged"
+            @click="submitPhone">
             Дугаар оруулах
         </button>
+
+        <template>
+            <div>
+                <alert-modal
+                    :visible.sync="showAlert"
+                    :title="title"
+                    :message="message"
+                    :type="alertType"
+                    @close="handleClose"
+                    :hide="handleClose" />
+            </div>
+        </template>
     </div>
 </template>
 
 <script>
+import api from '@/services/api';
+import { setData } from '@/Utils/LocalStorage';
+import alertModal from '@/components/alertModal.vue';
 export default {
     name: 'PhoneInfo',
     data() {
         return {
             phoneDigits: Array(8).fill(''),
+            phone: null,
+            message: '',
+            originalPhone: null, // ← нэмэх
+            title: 'Утасны дугаар солих',
+            alertType: 'success',
+            showAlert: false,
+            error: false,
         };
     },
+    components: {
+        alertModal,
+    },
+    props: {
+        userData: {
+            type: Object,
+            default: () => ({}),
+        },
+        update: {
+            type: Function,
+        },
+    },
+    mounted() {
+        const phoneAsInt = parseInt(this.userData.phone);
+        console.log(this.userData);
+        this.phoneDigits = this.userData.phone.toString().split('');
+        this.phone = phoneAsInt;
+
+        this.originalPhone = phoneAsInt.toString(); // ← нэмэх
+    },
     methods: {
-        focusNext(index, event) {
-            const value = event.target.value;
-            if (value && index < 7) {
-                const next = event.target.nextElementSibling;
-                if (next && next.tagName === 'INPUT') next.focus();
+        onInput(event) {
+            this.error = false;
+            let value = event.target.value;
+
+            // зөвхөн тоо хадгална, 8 оронтойгоор хязгаарлана
+            value = value.replace(/\D/g, '').slice(0, 8);
+
+            this.phone = value;
+        },
+        handleClose() {
+            // console.log('test');
+        },
+        async submitPhone() {
+            if (this.phone.length === 8 && /^\d+$/.test(this.phone)) {
+                try {
+                    await api.updateUser(this.userData.id, {
+                        PhoneNumber: this.phone,
+                    });
+                    let user = await api.getUser(this.userData.id);
+                    setData('userData', user);
+                    this.update();
+                    this.message = 'Амжилттай дугаар солигдлоо.';
+                    this.alertType = 'success';
+                    this.showAlert = true;
+                } catch (error) {
+                    console.log(error);
+                    this.message = 'Алдаа гарлаа дахин оролдоно уу.';
+                    this.showAlert = true;
+                    this.alertType = 'error';
+                }
+            } else {
+                this.error = true;
+                this.$toast.error('Бүх 8 цифрийг оруулна уу.');
             }
         },
-        submitPhone() {
-            const phone = this.phoneDigits.join('');
-            if (phone.length === 8 && /^\d+$/.test(phone)) {
-                alert('Таны оруулсан дугаар: ' + phone);
-                // TODO: API call
-            } else {
-                alert('Бүх 8 цифрийг оруулна уу');
-            }
+    },
+    computed: {
+        isPhoneChanged() {
+            if (this.phone == null || this.originalPhone == null) return false;
+            return this.phone.toString() !== this.originalPhone.toString();
         },
     },
 };
@@ -105,7 +163,6 @@ export default {
 }
 
 .digit-box input {
-    width: 40px;
     height: 40px;
     font-size: 20px;
     text-align: center;
@@ -126,5 +183,10 @@ export default {
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
+}
+
+.border-danger:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
 }
 </style>

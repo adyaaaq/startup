@@ -11,32 +11,112 @@
             товч дээр дарна уу
         </p>
 
-        <div class="email-display">
-            <span>{{ email }}</span>
+        <!-- <span>{{ email }}</span> -->
+        <div class="d-flex flex-row align-items-center gap-2 mb-3 mt-4">
+            <input
+                class="form-control"
+                type="text"
+                v-model="email"
+                :class="{
+                    'border-danger': error,
+                }"
+                @input="error = false" />
+
             <img
                 src="@/assets/svgicons/check.svg"
                 alt="Verified"
                 class="check-icon" />
         </div>
 
-        <button class="change-btn btn-primary" @click="changeEmail">
+        <button
+            class="change-btn btn-primary"
+            @click="changeEmail"
+            :disabled="!isPhoneChanged">
             Цахим хаяг солих
         </button>
+
+        <template>
+            <div>
+                <alert-modal
+                    :visible.sync="showAlert"
+                    :title="title"
+                    :message="message"
+                    :type="alertType"
+                    @close="handleClose"
+                    :hide="handleClose" />
+            </div>
+        </template>
     </div>
 </template>
 
 <script>
+import api from '@/services/api';
+import { setData } from '@/Utils/LocalStorage';
+import alertModal from '@/components/alertModal.vue';
 export default {
     name: 'EmailInfo',
     data() {
         return {
-            email: 'msn.njr111006@gmail.com',
+            email: null,
+            message: '',
+            originalEmail: null, // ← нэмэх
+            title: 'Имэйл хаяг солих',
+            alertType: 'success',
+            showAlert: false,
+            error: false,
         };
     },
+    components: {
+        alertModal,
+    },
+    props: {
+        userData: {
+            type: Object,
+            default: () => ({}),
+        },
+        update: {
+            type: Function,
+        },
+    },
+    mounted() {
+        this.email = this.userData.email.toString();
+        this.originalEmail = this.email; // ← нэмэх
+    },
     methods: {
-        changeEmail() {
-            alert('Цахим хаяг солих үйлдлийг эхлүүлж байна...');
-            // You could emit an event or navigate to a new email update page
+        handleClose() {
+            // console.log('test');
+        },
+        async changeEmail() {
+            let err = false;
+            const mail = this.email?.trim();
+            if (!mail) {
+                err = true;
+                this.error = true;
+            }
+            if (!err) {
+                try {
+                    await api.updateUser(this.userData.id, {
+                        Email: this.email,
+                    });
+                    let user = await api.getUser(this.userData.id);
+                    setData('userData', user);
+                    this.update();
+                    this.message = 'Амжилттай имэйл хаяг солигдлоо.';
+                    this.alertType = 'success';
+                    this.showAlert = true;
+                } catch (error) {
+                    console.log(error);
+                    this.message = 'Алдаа гарлаа дахин оролдоно уу.';
+                    this.showAlert = true;
+                    this.alertType = 'error';
+                }
+            }
+        },
+    },
+    computed: {
+        isPhoneChanged() {
+            if (this.email == null || this.originalEmail == null) return false;
+            return this.email.toString() !== this.originalEmail.toString();
         },
     },
 };
@@ -91,5 +171,10 @@ export default {
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
+}
+
+.border-danger:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
 }
 </style>
