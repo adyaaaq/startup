@@ -28,47 +28,101 @@ router.get('/:id', (req, res) => {
 // CREATE new user (register)
 router.post('/', async (req, res) => {
     const {
-        Username,
+        Email,
         Password,
         FirstName,
         LastName,
         PhoneNumber,
         Role,
         BranchId,
+        Genter,
+        BirthDay,
     } = req.body;
-    const hashed = await bcrypt.hash(Password, 10);
 
-    db.query(
-        'INSERT INTO Users (Username, Password, FirstName, LastName, PhoneNumber, Role, BranchId) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [Username, hashed, FirstName, LastName, PhoneNumber, Role, BranchId],
-        (err, result) => {
-            if (err) return res.status(500).send(err);
-            res.status(201).json({ id: result.insertId });
-        }
-    );
+    try {
+        // Check for existing email or phone
+        db.query(
+            `SELECT * FROM Users WHERE Email = ? OR PhoneNumber = ?`,
+            [Email, PhoneNumber],
+            async (err, results) => {
+                if (err) return res.status(500).send(err);
+
+                if (results.length > 0) {
+                    const existing = results[0];
+                    if (existing.Email === Email) {
+                        return res.status(400).json({
+                            message: 'Email аль хэдийн бүртгэгдсэн байна',
+                        });
+                    } else if (existing.PhoneNumber === PhoneNumber) {
+                        return res.status(400).json({
+                            message:
+                                'Утасны дугаар аль хэдийн бүртгэгдсэн байна',
+                        });
+                    }
+                }
+
+                const hashed = await bcrypt.hash(Password, 10);
+
+                db.query(
+                    `INSERT INTO Users 
+                    (Email, Password, FirstName, LastName, PhoneNumber, Role, BranchId, Genter, BirthDay) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        Email,
+                        hashed,
+                        FirstName,
+                        LastName,
+                        PhoneNumber,
+                        Role,
+                        BranchId,
+                        Genter,
+                        BirthDay,
+                    ],
+                    (err, result) => {
+                        if (err) return res.status(500).send(err);
+                        res.status(201).json({ id: result.insertId });
+                    }
+                );
+            }
+        );
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
 });
 
 // LOGIN (basic)
 router.post('/login', (req, res) => {
     const { Username, Password } = req.body;
+
+    // Email эсвэл PhoneNumber аль нэг байж болно
+    console.log('we are loggin in');
     db.query(
-        'SELECT * FROM Users WHERE Username = ?',
-        [Username],
+        `SELECT * FROM Users WHERE Email = ? OR PhoneNumber = ?`,
+        [Username, Username],
         async (err, results) => {
             if (err) return res.status(500).send(err);
-            if (results.length === 0)
-                return res.status(401).json({ message: 'User not found' });
+
+            if (results.length === 0) {
+                return res
+                    .status(404)
+                    .json({ message: 'Бүртгэлтэй хэрэглэгч олдсонгүй' });
+            }
 
             const user = results[0];
             const valid = await bcrypt.compare(Password, user.Password);
-            if (!valid)
-                return res.status(401).json({ message: 'Invalid password' });
+
+            if (!valid) {
+                return res
+                    .status(401)
+                    .json({ message: 'Имэйл/утас эсвэл нууц үг буруу байна' });
+            }
 
             res.json({
                 id: user.UserId,
-                username: user.Username,
+                username: user.Email || user.PhoneNumber,
                 role: user.Role,
-                message: 'Login successful',
+                message: 'Нэвтрэлт амжилттай',
             });
         }
     );

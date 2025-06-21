@@ -23,9 +23,6 @@
                 <router-link :to="{ name: 'Sets' }" class="cart-link">
                     <span class="auth-link">Багц </span>
                 </router-link>
-                <router-link :to="{ name: 'Login' }" class="cart-link">
-                    <span class="auth-link">Нэвтрэх</span>
-                </router-link>
 
                 <!-- Favorites -->
                 <router-link :to="{ name: 'Favorites' }" class="cart-link">
@@ -55,6 +52,14 @@
                             >{{ totalPrice.toLocaleString() }}₮</span
                         >
                     </div>
+                </router-link>
+
+                <router-link :to="{ name: 'Login' }" class="cart-link">
+                    <img
+                        class="svgicon"
+                        style="height: 16px; width: 16px"
+                        src="@/assets/svgicons/user.svg"
+                        alt="Favorites Icon" />
                 </router-link>
             </div>
         </div>

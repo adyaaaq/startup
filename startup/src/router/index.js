@@ -11,6 +11,10 @@ import Sets from '@/screens/Sets.vue';
 import ProductDetail from '@/screens/ProductDetail.vue';
 import Confirmation from '@/screens/Confirmation.vue';
 
+import AccountLayout from '@/screens/Account/AccountLayout.vue';
+import Info from '@/screens/Account/Info.vue';
+import Orders from '@/screens/Account/Orders.vue';
+
 import Users from '@/screens/Admin/Users/Users.vue';
 import Dashboard from '@/screens/Admin/Dashboard/Dashboard.vue';
 import AdminProducts from '@/screens/Admin/AdminProducts.vue';
@@ -19,6 +23,7 @@ import AdminSets from '@/screens/Admin/AdminSets.vue';
 import AdminLayout from '@/screens/Layout/AdminLayout.vue';
 import AdminCategories from '@/screens/Admin/AdminCategories.vue';
 import AdminBanner from '@/screens/Admin/AdminBanner.vue';
+
 Vue.use(Router);
 
 export default new Router({
@@ -33,6 +38,23 @@ export default new Router({
             name: 'Home',
             component: Home,
             meta: { breadcrumb: 'Нүүр хуудас' },
+        },
+
+        {
+            path: '/account',
+            component: AccountLayout,
+            children: [
+                {
+                    path: 'info',
+                    name: 'AccountInfo',
+                    component: Info,
+                },
+                {
+                    path: 'orders',
+                    name: 'AccountOrders',
+                    component: Orders,
+                },
+            ],
         },
         {
             path: '/cart',

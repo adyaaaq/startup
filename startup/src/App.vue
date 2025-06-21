@@ -224,6 +224,7 @@ small {
     font-weight: normal;
     font-size: calc(var(--bs-font-size) - 2px);
     line-height: calc(var(--bs-line-height) - 3px);
+    font-family: var(--text-font);
 }
 
 a {
@@ -630,6 +631,7 @@ button.close {
     line-height: var(--bs-line-height) !important;
     text-align: left;
     color: var(--text-color) !important;
+    font-family: var(--text-font);
 }
 
 .header-with-button {
@@ -983,6 +985,12 @@ input::-webkit-inner-spin-button {
     opacity: 1;
 }
 button {
+    font-family: var(--text-font);
+}
+label {
+    font-family: var(--text-font);
+}
+input::placeholder {
     font-family: var(--text-font);
 }
 </style>
