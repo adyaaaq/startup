@@ -226,7 +226,76 @@
                         </div>
                     </div>
                 </div>
-                <h4 class="mt-4 mb-3">Төлбөрийн төрөл</h4>
+
+                <h4 class="mt-4 mb-3">Баримт</h4>
+                <div>
+                    <label class="custom-radio">
+                        <input
+                            type="radio"
+                            value="1"
+                            v-model="selectedType"
+                            :class="{ 'border-danger': barimtError.choose }"
+                            @input="barimtError.choose = false" />
+                        <span
+                            :class="{
+                                'radio-check': true,
+                                error: barimtError.choose,
+                            }"></span>
+                        Хувь хүн
+                    </label>
+
+                    <label class="custom-radio" style="margin-left: 20px">
+                        <input
+                            type="radio"
+                            value="2"
+                            v-model="selectedType"
+                            :class="{ 'border-danger': barimtError.choose }"
+                            @input="barimtError.choose = false" />
+                        <span
+                            :class="{
+                                'radio-check': true,
+                                error: barimtError.choose,
+                            }"></span>
+                        Байгууллага
+                    </label>
+                </div>
+                <div
+                    v-if="selectedType == '2'"
+                    class="row-2 d-flex flex-row gap-3 align-items-end mt-3">
+                    <div class="d-flex flex-column gap-1 w-100">
+                        <div class="d-flex flex-row">
+                            <span class="text-danger">* </span>&nbsp;
+                            <p>Регистерийн дугаар</p>
+                        </div>
+                        <input
+                            type="text"
+                            v-model="register"
+                            placeholder="Регистерийн дугаар"
+                            class="form-control custom-placeholder"
+                            :class="{
+                                'border-danger': barimtError.register,
+                            }"
+                            maxlength="100"
+                            @input="barimtError.register = false" />
+                    </div>
+                    <div class="d-flex flex-column gap-1 w-100">
+                        <div class="d-flex flex-row">
+                            <span class="text-danger">* </span>&nbsp;
+                            <p>Байгууллагын нэр</p>
+                        </div>
+                        <input
+                            type="text"
+                            v-model="orgName"
+                            placeholder="Байгууллагын нэр"
+                            class="form-control custom-placeholder"
+                            :class="{
+                                'border-danger': barimtError.orgName,
+                            }"
+                            @input="barimtError.orgName = false"
+                            maxlength="50" />
+                    </div>
+                </div>
+                <!-- <h4 class="mt-4 mb-3">Төлбөрийн төрөл</h4>
                 <div class="bank-grid">
                     <BankItem
                         v-for="bank in banks"
@@ -237,7 +306,7 @@
                         :image="bank.image"
                         :selected-id="selectedBankId"
                         @select="selectedBankId = $event" />
-                </div>
+                </div> -->
             </div>
             <div class="d-flex col flex-column">
                 <h4 class="mt-4 mb-3">Хүргэлтийн хаяг</h4>
@@ -462,19 +531,30 @@
                 </button>
             </div>
         </b-modal>
+        <template>
+            <div>
+                <alert-modal
+                    :visible.sync="showAlert"
+                    :title="title"
+                    :message="message"
+                    :type="alertType"
+                    @close="handleClose"
+                    :hide="handleClose" />
+            </div>
+        </template>
     </div>
 </template>
 
 <script>
 import locationItem from '@/components/locationItem.vue';
-import BankItem from '@/components/banktem.vue';
+// import BankItem from '@/components/banktem.vue';
 import { EventBus } from '@/Utils/eventBus';
 import api from '@/services/api';
-import { getData } from '@/Utils/LocalStorage';
-
+import { getData, setData } from '@/Utils/LocalStorage';
+import alertModal from '@/components/alertModal.vue';
 export default {
     name: 'CartPage',
-    components: { locationItem, BankItem },
+    components: { locationItem, alertModal },
     data() {
         return {
             cartItems: [],
@@ -556,6 +636,20 @@ export default {
                 },
             ],
             userData: null,
+
+            message: '',
+            title: 'Хувийн мэдээлэл засах',
+            alertType: 'success',
+            showAlert: false,
+            newOrderId: null,
+            selectedType: null,
+            register: null,
+            orgName: null,
+            barimtError: {
+                register: false,
+                orgName: false,
+                choose: false,
+            },
         };
     },
     async mounted() {
@@ -596,27 +690,37 @@ export default {
                     });
                 });
                 let order = {
-                    UserId: 1,
-                    PaymentType: this.selectedBankId,
+                    UserId: this.userData.id,
+                    // PaymentType: this.selectedBankId,
                     LocationId: this.selectedLocation.LocationId,
+                    fname: this.customerInfo.f_name,
+                    lname: this.customerInfo.l_name,
+                    phone: this.customerInfo.phone_number,
+                    barimt: this.selectedType,
+                    register: this.register == '' && 'null',
+                    orgName: this.orgName == '' && 'null',
+                    isPaid: false,
                     products: products,
                 };
-                console.log(order);
-                localStorage.setItem('pendingOrder', JSON.stringify(order));
-                this.$router.push({ name: 'Confirmation' });
-                // this.$router.push({
-                //     name: 'Confirmation',
-                //     params: {
-                //         order: JSON.stringify(order),
-                //     },
-                // });
 
-                // try {
-                //     await api.createOrder(order);
+                // localStorage.setItem('pendingOrder', JSON.stringify(order));
 
-                // } catch (error) {
-                //     console.log('alda shude ho ');
-                // }
+                try {
+                    const result = await api.createOrder(order);
+                    this.newOrderId = result.OrderId;
+                    console.log('result: ', result);
+                    setData('selectedOrder', this.newOrderId);
+                    localStorage.removeItem('cart');
+                    EventBus.$emit('cart-updated', []);
+                    this.cartItems = [];
+                    this.message = 'Амжилттай захиалга амжилттай үүслээ.';
+                    this.alertType = 'success';
+                    this.showAlert = true;
+                } catch (error) {
+                    this.message = 'Алдаа гарлаа. Дахин оролдоно уу.';
+                    this.alertType = 'error';
+                    this.showAlert = true;
+                }
             } else {
                 console.log('error');
             }
@@ -860,31 +964,50 @@ export default {
                 }
             }
             if (op == 2) {
-                if (
-                    this.cartItems.length == 0 ||
-                    this.selectedCartItems.length == 0
-                ) {
+                if (this.cartItems.length == 0) {
                     err = false;
+                    this.$toast.error('Сагс хоосон байна.');
                 } else {
-                    const fname = this.customerInfo.f_name.trim();
-                    const lname = this.customerInfo.l_name.trim();
-                    if (!fname) {
-                        this.customerError.f_name = true;
+                    if (this.selectedCartItems.length == 0) {
                         err = false;
-                    }
-                    if (!lname) {
-                        this.customerError.l_name = true;
-                        err = false;
-                    }
+                        this.$toast.error('Бүтээгдэхүүн сонгоно уу.');
+                    } else {
+                        const fname = this.customerInfo.f_name.trim();
+                        const lname = this.customerInfo.l_name.trim();
+                        if (this.selectedType == '2') {
+                            const register = this.register.trim();
+                            const org = this.orgName.trim();
+                            if (!register) {
+                                this.barimtError.register = true;
+                                err = false;
+                            }
+                            if (!org) {
+                                this.barimtError.orgName = true;
+                                err = false;
+                            }
+                        }
+                        if (!fname) {
+                            this.customerError.f_name = true;
+                            err = false;
+                        }
+                        if (!lname) {
+                            this.customerError.l_name = true;
+                            err = false;
+                        }
 
-                    const p = this.customerInfo.phone_number;
-                    if (!p || p.toString().length !== 8) {
-                        this.customerError.phone_number = true;
-                        err = false;
-                    }
-                    if (this.selectedBankId == null) {
-                        console.log('bank song');
-                        err = false;
+                        const p = this.customerInfo.phone_number;
+                        if (!p || p.toString().length !== 8) {
+                            this.customerError.phone_number = true;
+                            err = false;
+                        }
+                        if (this.selectedType == null) {
+                            this.barimtError.choose = true;
+                            err = false;
+                        }
+                        // if (this.selectedBankId == null) {
+                        //     console.log('bank song');
+                        //     err = false;
+                        // }
                     }
                 }
             }
@@ -900,7 +1023,14 @@ export default {
                 ...item,
                 quantity: item.quantity || 1, // Default to 1 if no quantity found
             }));
-            console.log(this.cartItems);
+        },
+
+        handleClose() {
+            if (this.alertType === 'success') {
+                this.$router.push({
+                    name: 'Confirmation',
+                });
+            }
         },
     },
 };
@@ -1147,7 +1277,42 @@ export default {
     background-color: gray;
     color: white;
 }
+.custom-radio {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
 
+.custom-radio input[type='radio'] {
+    display: none;
+}
+
+.radio-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    margin-right: 8px;
+    position: relative;
+    transition: border 0.2s;
+}
+
+input[type='radio']:checked + .radio-check::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 3px;
+    left: 3px;
+    background-color: #007bff;
+    border-radius: 50%;
+}
+
+.radio-check.error {
+    border-color: #dc3545; /* Bootstrap's red */
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
 .modal-btn.confirm {
     background-color: #6c63ff;
     color: white;

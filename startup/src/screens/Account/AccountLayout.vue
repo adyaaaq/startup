@@ -7,6 +7,16 @@
             <router-link to="/account/orders" class="link" active-class="active"
                 >Захиалгууд</router-link
             >
+            <!-- <ul class="submenu">
+                <li>
+                    <router-link
+                        to="/account/orders/list"
+                        class="sublink"
+                        active-class="active">
+                        Захиалга
+                    </router-link>
+                </li>
+            </ul> -->
             <a class="link" @click="logout">Гарах</a>
         </aside>
 

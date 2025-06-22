@@ -416,6 +416,15 @@ export default {
                 );
             }
         },
+        limitPhoneNumber(event) {
+            this.error.phone_number = false;
+            let value = event.target.value;
+            if (value.length > 8) {
+                value = value.slice(0, 8);
+                event.target.value = value;
+                this.editedLocation.anotherPerson.phone_number = value;
+            }
+        },
         validate(op) {
             let err = true;
             if (op == 1) {

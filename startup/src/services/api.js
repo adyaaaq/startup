@@ -69,6 +69,12 @@ export const loginUser = (data) =>
 export const getOrders = () => api.get('/orders').then((res) => res.data);
 export const getOrdersByUser = (userId) =>
     api.get(`/orders/user/${userId}`).then((res) => res.data);
+
+export const getOrdersByUserAndProduct = (userId, productId) =>
+    api
+        .get(`/orders/user/${userId}/product/${productId}`)
+        .then((res) => res.data);
+
 export const createOrder = (data) =>
     api.post('/orders', data).then((res) => res.data);
 export const deleteOrder = (id) =>
@@ -141,6 +147,7 @@ export default {
 
     getOrders,
     getOrdersByUser,
+    getOrdersByUserAndProduct,
     createOrder,
     deleteOrder,
 
